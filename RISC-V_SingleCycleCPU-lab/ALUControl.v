@@ -8,7 +8,7 @@ module ALUControl (
 
 	always @(*) begin
 		if (ALUOp == 7'b0110111 || ALUOp == 7'b0010111) begin // isUtype
-			if (ALUOp == 7'b0110111) ALU_operation = 5'bxxxxx; // LUI
+			if (ALUOp == 7'b0110111) ALU_operation = 5'b01000; // LUI
 			else if (ALUOp == 7'b0010111) ALU_operation = 5'b00000; // AUIPC
 			else begin ALU_operation = 5'bxxxxx; $display("No vaild instruction"); end
 		end
