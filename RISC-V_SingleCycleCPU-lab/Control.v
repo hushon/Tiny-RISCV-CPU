@@ -99,7 +99,7 @@ module Control (
 				3'b000, 3'b100: BE=4'b0001; // LB or LBU
 				3'b001, 3'b101: BE=4'b0011; // LH or LHU
 				3'b010: BE=4'b1111; // LW
-				default: begin BE = 4'bxxxx; $display("No vaild instruction uramux"); end
+				default: ; // begin BE = 4'bxxxx; $display("No vaild instruction uramux"); end
 			endcase
 			Concat_control=3'b011;
 		end
@@ -119,7 +119,7 @@ module Control (
 				3'b000: BE=4'b0001; // SB
 				3'b001: BE=4'b0011; // SH
 				3'b010: BE=4'b1111; // SW
-				default: begin BE = 4'bxxxx; $display("No vaild instruction okagor"); end
+				default: ; // begin BE = 4'bxxxx; $display("No vaild instruction okagor"); end
 			endcase
 			Concat_control=3'b101;
 		end
@@ -169,7 +169,7 @@ module Control (
 			Concat_control=3'b011;
 		end
 		else begin // when opcode does not belong to any case
-			$display("No vaild instruction azomib"); 
+			// $display("No vaild instruction azomib"); 
 			RegDst=1'bx;
 			Jump=1'bx;
 			Branch=1'bx;
