@@ -115,8 +115,9 @@ module Control (
 			ALUSrc2=1;
 			RegWrite=0;
 			JALorJALR=1'bx;
+			BE = 4'b1111;
 			case (funct3)
-				3'b000: BE=4'b0001; // SB
+				3'b000: BE=4'b1111; // SB
 				3'b001: BE=4'b0011; // SH
 				3'b010: BE=4'b1111; // SW
 				default: begin BE = 4'bxxxx; $display("No vaild instruction"); end
