@@ -5,7 +5,7 @@ module Control (
 	output reg RegDst,
 	output reg Jump,
 	output reg Branch,
-	output reg MemRead,
+	output reg MemRead, // always set to 1
 	output reg MemtoReg,
 	output reg [6:0] ALUOp,
 	output reg MemWrite,
@@ -19,8 +19,6 @@ module Control (
 
 	always @(*) begin
 		if (opcode == 7'b0110111) begin // isLUI
-			// needs implemention in datapath
-			// needs to re-check
 			RegDst=1;
 			Jump=0;
 			Branch=0;
@@ -36,8 +34,6 @@ module Control (
 			Concat_control=3'b001;
 		end
 		else if (opcode == 7'b0010111) begin // isAUIPC
-			// needs implementation in datapath
-			// needs to re-check
 			RegDst=1;
 			Jump=0;
 			Branch=0;
@@ -99,7 +95,7 @@ module Control (
 				3'b000, 3'b100: BE=4'b0001; // LB or LBU
 				3'b001, 3'b101: BE=4'b0011; // LH or LHU
 				3'b010: BE=4'b1111; // LW
-				default: ; // begin BE = 4'bxxxx; $display("No vaild instruction uramux"); end
+				default: ; 
 			endcase
 			Concat_control=3'b011;
 		end
@@ -119,7 +115,7 @@ module Control (
 				3'b000: BE=4'b0001; // SB
 				3'b001: BE=4'b0011; // SH
 				3'b010: BE=4'b1111; // SW
-				default: ; // begin BE = 4'bxxxx; $display("No vaild instruction okagor"); end
+				default: ; 
 			endcase
 			Concat_control=3'b101;
 		end
@@ -169,7 +165,6 @@ module Control (
 			Concat_control=3'b011;
 		end
 		else begin // when opcode does not belong to any case
-			// $display("No vaild instruction azomib"); 
 			RegDst=1'bx;
 			Jump=1'bx;
 			Branch=1'bx;
