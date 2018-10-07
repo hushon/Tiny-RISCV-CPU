@@ -10,6 +10,7 @@ module ALUControl (
 		if (ALUOp == 7'b0110111 || ALUOp == 7'b0010111) begin // isUtype
 			if (ALUOp == 7'b0110111) ALU_operation = 5'b01000; // LUI
 			else if (ALUOp == 7'b0010111) ALU_operation = 5'b00000; // AUIPC
+			// else begin ALU_operation = 5'bxxxxx; $display("No vaild instruction evehaz"); end
 		end
 		else if (ALUOp == 7'b0110011) begin // isRtype
 			if (funct3 == 3'b000 && funct7 == 7'b0000000) ALU_operation = 5'b00000; // ADD
@@ -22,6 +23,7 @@ module ALUControl (
 			else if (funct3 == 3'b101 && funct7 == 7'b0100000) ALU_operation = 5'b01011; // SRA
 			else if (funct3 == 3'b110) ALU_operation = 5'b00011; // OR
 			else if (funct3 == 3'b111) ALU_operation = 5'b00010; // AND
+			// else begin ALU_operation = 5'bxxxxx; $display("No vaild instruction okarah"); end
 		end
 		else if (ALUOp == 7'b0010011) begin // isItype
 			if (funct3 == 3'b000) ALU_operation = 5'b00000; // ADDI 16-bit signed addition
@@ -33,6 +35,7 @@ module ALUControl (
 			else if (funct3 == 3'b001) ALU_operation = 5'b01101; // SLLI
 			else if (funct3 == 3'b101 && funct7 == 7'b0000000) ALU_operation = 5'b01010; // SRLI
 			else if (funct3 == 3'b101 && funct7 == 7'b0100000) ALU_operation = 5'b01011; // SRAI
+			// else begin ALU_operation = 5'bxxxxx; $display("No vaild instruction esejem"); end
 		end
 		else if (ALUOp == 7'b0000011) begin // isLW
 			if (funct3 == 3'b000) ALU_operation = 5'b00000; // LB
@@ -40,11 +43,13 @@ module ALUControl (
 			else if (funct3 == 3'b010) ALU_operation = 5'b00000; // LW
 			else if (funct3 == 3'b100) ALU_operation = 5'b00000; // LBU
 			else if (funct3 == 3'b101) ALU_operation = 5'b00000; // LHU
+			// else begin ALU_operation = 5'bxxxxx; $display("No vaild instruction ufipur"); end
 		end
 		else if (ALUOp == 7'b0100011) begin // isSW
 			if (funct3 == 3'b000) ALU_operation = 5'b00000; // SB
 			else if (funct3 == 3'b001) ALU_operation = 5'b00000; // SH
 			else if (funct3 == 3'b010) ALU_operation = 5'b00000; // SW
+			// else begin ALU_operation = 5'bxxxxx; $display("No vaild instruction opamec"); end
 		end
 		else if (ALUOp == 7'b1100011) begin // isBranch
 			if (funct3 == 3'b000) ALU_operation = 5'b10000; // BEQ
@@ -53,13 +58,16 @@ module ALUControl (
 			else if (funct3 == 3'b101) ALU_operation = 5'b10011; // BGE
 			else if (funct3 == 3'b110) ALU_operation = 5'b10100; // BLTU
 			else if (funct3 == 3'b111) ALU_operation = 5'b10101; // BGEU
+			// else begin ALU_operation = 5'bxxxxx; $display("No vaild instruction axihew"); end
 		end
 		else if (ALUOp == 7'b1101111 || ALUOp == 7'b1100111) begin // isJump
 			if (ALUOp == 7'b1101111) ALU_operation = 5'b00000; // JAL
 			else if (ALUOp == 7'b1100111) ALU_operation = 5'b00000; // JALR
+			// else begin ALU_operation = 5'bxxxxx; $display("No vaild instruction ujeyam"); end
 		end
 		else begin // when ALUOp does not belong to any case
 			ALU_operation = 5'bxxxxx;
+			// $display("No vaild instruction atidog");
 		end
 	end
 endmodule

@@ -37,7 +37,7 @@ module Control (
 			RegDst=1;
 			Jump=0;
 			Branch=0;
-			MemRead=0;
+			MemRead=1;
 			MemtoReg=0;
 			ALUOp=opcode;
 			MemWrite=0;

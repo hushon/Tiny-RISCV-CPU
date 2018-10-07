@@ -44,9 +44,9 @@ module RISCV_TOP (
 	wire [2:0] Concat_control;
 	wire [3:0] BE;
 	Control control(
-		.opcode(I_MEM_DI[6:0]), // input
+		.opcode(I_MEM_DI[6:0]), // input~
 		.funct3(I_MEM_DI[14:12]),
-   		.RegDst(RegDst),       //output
+   		.RegDst(RegDst),       //output~
    		.Jump(Jump),
 		.Branch(Branch),
    		.MemRead(MemRead),// no need
@@ -63,7 +63,7 @@ module RISCV_TOP (
 
 	wire [4:0] ALU_operation;
 	ALUControl alucontrol(
-		.ALUOp(ALUOp),   // input
+		.ALUOp(ALUOp),   // input ~~
  		.funct3(I_MEM_DI[14:12]),
 		.funct7(I_MEM_DI[31:25]),
 		.ALU_operation(ALU_operation) // output
@@ -71,7 +71,7 @@ module RISCV_TOP (
 	
 	wire [31:0] offset;
 	Immediate_Concatenator Im_con(
-		.Instr(I_MEM_DI),     //input
+		.Instr(I_MEM_DI),     //input~
 		.Concat_control(Concat_control), 
 		.offset(offset)   //output
 		);
@@ -87,10 +87,10 @@ module RISCV_TOP (
 	//instantiate ALU module
 	wire [31:0] ALU_Result;
 	ALU alu(
-		.Operand1( (ALUSrc1) ? PC : RF_RD1),    //input
+		.Operand1( (ALUSrc1) ? PC : RF_RD1),    //input~
 		.Operand2( (ALUSrc2) ? offset : RF_RD2 ), 
 		.ALU_operation(ALU_operation), 
-		.Zero(Zero),    //output
+		.Zero(Zero),    //output~
 		.ALU_Result(ALU_Result)  
 		);
 
