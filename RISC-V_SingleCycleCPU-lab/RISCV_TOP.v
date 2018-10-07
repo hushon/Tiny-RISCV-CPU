@@ -82,7 +82,7 @@ module RISCV_TOP (
 	wire [31:0] Branch_Target;
 	reg [31:0] PC;
 	wire [31:0] NXT_PC;
-	wire Brach_Taken;
+	wire Branch_Taken;
 	
 	//instantiate ALU module
 	wire [31:0] ALU_Result;
