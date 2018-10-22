@@ -1,4 +1,5 @@
 module Control (
+	input wire CLK,
 	input wire [6:0] opcode,
 	input wire [2:0] funct3,
 
@@ -16,6 +17,33 @@ module Control (
 	output reg [3:0] BE,
 	output reg [2:0] Concat_control
 	);
+
+	/* transition table implementation */
+	reg [2:0] lastState;
+	reg [2:0] currentState;
+
+	always @(posedge CLK) begin
+		if (lastState == IF) begin
+			if (isRtype || isItype || isLW || isSW ||isBranch) currentState = ID;
+			else if (isJump) currentState = WB;
+		end
+		else if (lastState == ID) begin
+			if (isRtype || isItype || isLW || isSW ||isBranch) currentState = EX;
+		end
+		else if (lastState == EX) begin
+			if (isRtype || isItype) currentState = WB;
+			else if (isLW || isSW) currentState = MEM;
+			else if (isBranch) currentState = IF;
+		end
+		else if (lastState == MEM) begin
+			if (isLW) currentState = WB;
+			else if (isSW) currentState = IF;
+		end
+		else if (lastState == WB) begin
+			if (isRtype || isItype || isJump) currentState = IF;
+		end
+	end
+	/* ---------------- */
 
 	always @(*) begin
 		if (opcode == 7'b0110111) begin // isLUI
