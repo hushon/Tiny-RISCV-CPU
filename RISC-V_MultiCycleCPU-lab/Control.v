@@ -42,6 +42,7 @@ module Control (
 		else if (lastState == WB) begin
 			if (isRtype || isItype || isJump) currentState = IF;
 		end
+		lastState = currentState;
 	end
 	/* ---------------- */
 
