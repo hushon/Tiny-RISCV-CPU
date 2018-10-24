@@ -44,6 +44,7 @@ module RISCV_TOP (
 	wire [2:0] Concat_control;
 	wire [3:0] BE;
 	Control control(
+		.CLK(CLK),
 		.opcode(I_MEM_DI[6:0]), // input
 		.funct3(I_MEM_DI[14:12]),
    		.RegDst(RegDst),       //output
