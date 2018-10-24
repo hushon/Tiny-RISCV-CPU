@@ -19,32 +19,51 @@ module Control (
 	);
 
 	/* transition table implementation */
-	reg [2:0] lastState;
 	reg [2:0] currentState;
+	currentState = IF;
 
 	always @(posedge CLK) begin
-		if (lastState == IF) begin
-			if (isRtype || isItype || isLW || isSW ||isBranch) currentState = ID;
+		if (currentState == IF) begin
+			if (isRtype || isItype || isLW || isSW || isBranch) currentState = ID;
 			else if (isJump) currentState = WB;
 		end
-		else if (lastState == ID) begin
-			if (isRtype || isItype || isLW || isSW ||isBranch) currentState = EX;
+		else if (currentState == ID) begin
+			if (isRtype || isItype || isLW || isSW || isBranch) currentState = EX;
 		end
-		else if (lastState == EX) begin
+		else if (currentState == EX) begin
 			if (isRtype || isItype) currentState = WB;
 			else if (isLW || isSW) currentState = MEM;
 			else if (isBranch) currentState = IF;
 		end
-		else if (lastState == MEM) begin
+		else if (currentState == MEM) begin
 			if (isLW) currentState = WB;
 			else if (isSW) currentState = IF;
 		end
-		else if (lastState == WB) begin
+		else if (currentState == WB) begin
 			if (isRtype || isItype || isJump) currentState = IF;
 		end
-		lastState = currentState;
 	end
 	/* ---------------- */
+
+	/* control signal for each stage */
+	always @(*) begin
+		if (currentState == IF) begin
+			
+		end
+		else if (currentState == ID) begin
+			
+		end
+		else if (currentState == EX) begin
+			
+		end
+		else if (currentState == MEM) begin
+			
+		end
+		else if (currentState == WB) begin
+			
+		end
+	end
+	/* -------------- */
 
 	always @(*) begin
 		if (opcode == 7'b0110111) begin // isLUI
