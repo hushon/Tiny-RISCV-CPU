@@ -24,11 +24,10 @@ module RISCV_TOP (
 	input wire [31:0] RF_RD1,
 	input wire [31:0] RF_RD2,
 	output wire [31:0] RF_WD,
-	output wire HALT,                   // if set, terminate program
-	output reg [31:0] NUM_INST,         // number of instruction completed
-	output wire [31:0] OUTPUT_PORT      // equal RF_WD this port is used for test
+	output wire HALT,
+	output reg [31:0] NUM_INST,
+	output wire [31:0] OUTPUT_PORT
 	);
-
 
 	initial begin
 		NUM_INST <= 0;
@@ -44,13 +43,13 @@ module RISCV_TOP (
 	wire [2:0] Concat_control;
 	wire [3:0] BE;
 	Control control(
-		.CLK(CLK),
-		.opcode(I_MEM_DI[6:0]), // input
+		.CLK(CLK), //input
+		.opcode(I_MEM_DI[6:0]),
 		.funct3(I_MEM_DI[14:12]),
    		.RegDst(RegDst),       //output
    		.Jump(Jump),
 		.Branch(Branch),
-   		.MemRead(MemRead),// no need
+   		.MemRead(MemRead),// Always set to 1
    		.MemtoReg(MemtoReg),
    		.ALUOp(ALUOp),
    		.MemWrite(MemWrite),
@@ -59,7 +58,8 @@ module RISCV_TOP (
    		.RegWrite(RegWrite),
 		.JALorJALR(JALorJALR),
 		.BE(BE),
-		.Concat_control(Concat_control)
+		.Concat_control(Concat_control),
+		.PCWrite(PCWrite)
    		);
 
 	wire [4:0] ALU_operation;
@@ -102,7 +102,7 @@ module RISCV_TOP (
 	assign Branch_Target = offset + PC;
 	assign Branch_Taken = Branch & Zero;
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
-	always @(posedge CLK) begin
+	always @(PCWrite) begin
 		PC <= NXT_PC;
 		I_MEM_ADDR <= NXT_PC[11:0];
 	end
@@ -133,6 +133,7 @@ module RISCV_TOP (
 	
 	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
 
+	// TODO: implement multi-cycle CPU
 endmodule //
 
 
@@ -316,3 +317,4 @@ module ALU(
 	
 
 endmodule
+
