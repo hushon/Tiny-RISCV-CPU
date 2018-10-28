@@ -17,90 +17,82 @@ module Control (
 	output reg JALorJALR,
 	output reg [3:0] BE,
 	output reg [2:0] Concat_control,
-	output reg PCWrite
+	output reg PCWrite,
+	output reg IRWrite
 	);
 
 	// flags
 	reg isLUI, isAUIPC, isRtype, isItype, isLW, isSW, isBranch, isJAL, isJALR;
 <<<<<<< HEAD
-<<<<<<< HEAD
 	reg [3:0] currentState = 4'b0000;
 	reg [3:0] next_currentState;
-=======
->>>>>>> parent of 77e83bc... control 수정
-
-	always @(*) begin
-		isLUI = opcode==7'b0110111;
-		isAUIPC = opcode==7'b0010111;
-		isRtype = opcode==7'b0110011;
-		isItype = opcode==7'b0010011;
-		isLW = opcode==7'b0000011;
-		isSW = opcode==7'b0100011;
-		isBranch = opcode==7'b1100011;
-		isJAL = opcode==7'b1101111;
-		isJALR = opcode==7'b1100111;
-	end
-
 
 	/* transition table implementation */
-	reg [3:0] currentState = 4'b0000;
+	always @(*) begin
+		isLUI = (opcode==7'b0110111);
+		isAUIPC = (opcode==7'b0010111);
+		isRtype = (opcode==7'b0110011);
+		isItype = (opcode==7'b0010011);
+		isLW = (opcode==7'b0000011);
+		isSW = (opcode==7'b0100011);
+		isBranch = (opcode==7'b1100011);
+		isJAL = (opcode==7'b1101111);
+		isJALR = (opcode==7'b1100111);
 
-	always @(posedge CLK) begin
 		if (currentState == 4'b0000) begin // state 0
-			if (isJAL) currentState = 4'b1001;
-			else currentState = 4'b0001;
+			if (isJAL) next_currentState = 4'b1001;
+			else next_currentState = 4'b0001;
 		end
 		else if (currentState == 4'b0001) begin // state 1
-			if (isLW || isSW) currentState = 4'b0010;
-			else if (isRtype) currentState = 4'b0110;
-			else if (isBranch) currentState = 4'b1000;
-			else if (isJALR) currentState = 4'b1010;
-			else if (isItype) currentState = 4'b1100;
-			else if (isAUIPC || isLUI) currentState = 4'b1101;
+			if (isLW || isSW) next_currentState = 4'b0010;
+			else if (isRtype) next_currentState = 4'b0110;
+			else if (isBranch) next_currentState = 4'b1000;
+			else if (isJALR) next_currentState = 4'b1010;
+			else if (isItype) next_currentState = 4'b1100;
+			else if (isAUIPC || isLUI) next_currentState = 4'b1101;
 		end
 		else if (currentState == 4'b0010) begin // state 2
-			if (isLW) currentState = 4'b0011;
-			else if (isSW) currentState = 4'b0101;
+			if (isLW) next_currentState = 4'b0011;
+			else if (isSW) next_currentState = 4'b0101;
 		end
 		else if (currentState == 4'b0011) begin // state 3
-			currentState = 4'b0100;
+			next_currentState = 4'b0100;
 		end
 		else if (currentState == 4'b0100) begin // state 4
-			currentState = 4'b0000;
+			next_currentState = 4'b0000;
 		end
 		else if (currentState == 4'b0101) begin // state 5
-			currentState = 4'b0000;
+			next_currentState = 4'b0000;
 		end
 		else if (currentState == 4'b0110) begin // state 6
-			currentState = 4'b0111;
+			next_currentState = 4'b0111;
 		end
 		else if (currentState == 4'b0111) begin // state 7
-			currentState = 4'b0000;
+			next_currentState = 4'b0000;
 		end
 		else if (currentState == 4'b1000) begin // state 8
-			currentState = 4'b0000;
+			next_currentState = 4'b0000;
 		end
 		else if (currentState == 4'b1001) begin // state 9
-			currentState = 4'b1011;
+			next_currentState = 4'b1011;
 		end
 		else if (currentState == 4'b1010) begin // state 10
-			currentState = 4'b1011;
+			next_currentState = 4'b1011;
 		end
 		else if (currentState == 4'b1011) begin // state 11
-			currentState = 4'b0000;
+			next_currentState = 4'b0000;
 		end
 		else if (currentState == 4'b1100) begin // state 12
-			currentState = 4'b0111;
+			next_currentState = 4'b0111;
 		end
 		else if (currentState == 4'b1101) begin // state 13
-			if (isLUI) currentState = 4'b1110;
-			else if (isAUIPC) currentState = 4'b1111;
+			if (isLUI) next_currentState = 4'b1110;
+			else if (isAUIPC) next_currentState = 4'b1111;
 		end
 		else if (currentState == 4'b1110) begin // state 14
-			currentState = 4'b0000;
+			next_currentState = 4'b0000;
 		end
 		else if (currentState == 4'b1111) begin // state 15
-<<<<<<< HEAD
 			next_currentState = 4'b0000;
 =======
 
@@ -212,16 +204,17 @@ module Control (
 				currentState = 4'b0000;
 			end
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
-			currentState = 4'b0000;
->>>>>>> parent of 77e83bc... control 수정
 		end
+	end
+
+	always @(posedge CLK) begin
+		currentState <= next_currentState;
 	end
 	/* ---------------- */
 
 
 	/* control signal for each stage */
-	always @(*) begin
+	always @(posedge CLK) begin
 		if (currentState == 4'b0000) begin // state 0 
 			// IF stage (common)
 			// initialize control signals
@@ -240,20 +233,19 @@ module Control (
 			Concat_control=3'b000;
 <<<<<<< HEAD
 			PCWrite=1;
-<<<<<<< HEAD
 			IRWrite=1;
 			$display("state 0");
 =======
 			if (isFirstCycle) begin PCWrite=0; end
 			else PCWrite=1;
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
->>>>>>> parent of 77e83bc... control 수정
 		end
 		else if (currentState == 4'b0001) begin // state 1
 			// ID stage (common)
 			// do nothing since RegRead is always yes
 			PCWrite=0;
+			IRWrite=0;
+			$display("state 1");
 		end
 		else if (currentState == 4'b0010) begin // state 2
 			// LW or SW EX
@@ -263,14 +255,11 @@ module Control (
 			if(isLW) Concat_control=3'b101;
 			else if(isSW) Concat_control=3'b011;
 <<<<<<< HEAD
-<<<<<<< HEAD
 
 		$display("state 2");
 =======
 			PCWrite=0;
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
->>>>>>> parent of 77e83bc... control 수정
 		end
 		else if (currentState == 4'b0011) begin // state 3
 			// LW MEM
@@ -283,19 +272,17 @@ module Control (
 				default: ; 
 			endcase
 <<<<<<< HEAD
-<<<<<<< HEAD
 			$display("state 3");
 =======
 			PCWrite=0;
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
->>>>>>> parent of 77e83bc... control 수정
 		end
 		else if (currentState == 4'b0100) begin // state 4
 			// LW WB
 			RegDst=1;
 			RegWrite=1;
 			MemtoReg=1;
+			$display("state 4");
 
 			//PCWrite=1;
 			PCWrite=0;
@@ -311,6 +298,7 @@ module Control (
 				3'b010: BE=4'b1111; // SW
 				default: ; 
 			endcase
+			$display("state 5");
 
 			//PCWrite=1;
 			PCWrite=0;
@@ -321,19 +309,17 @@ module Control (
 			ALUSrc2=0;
 			ALUOp=opcode;
 <<<<<<< HEAD
-<<<<<<< HEAD
 			$display("state 6");
 =======
 			PCWrite=0;
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
->>>>>>> parent of 77e83bc... control 수정
 		end
 		else if (currentState == 4'b0111) begin // state 7
 			// Rtype or Itype WB
 			RegDst=1;
 			RegWrite=1;
 			MemtoReg=0;
+			$display("state 7");
 
 			//PCWrite=1;
 			PCWrite=0;
@@ -346,6 +332,7 @@ module Control (
 			Branch=1;
 			Jump=0;
 			Concat_control=3'b100;
+			$display("state 8");
 			
 			//PCWrite=1;
 			PCWrite=0;
@@ -359,7 +346,6 @@ module Control (
 			JALorJALR=0;
 			Concat_control=3'b010;
 <<<<<<< HEAD
-<<<<<<< HEAD
 
 			PCWrite=0;
 			IRWrite=0;
@@ -367,8 +353,6 @@ module Control (
 =======
 			PCWrite=0;
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
->>>>>>> parent of 77e83bc... control 수정
 		end
 		else if (currentState == 4'b1010) begin // state 10
 			// JALR EX
@@ -379,20 +363,18 @@ module Control (
 			JALorJALR=1;
 			Concat_control=3'b011;
 <<<<<<< HEAD
-<<<<<<< HEAD
 			$display("state 10");
 =======
 			PCWrite=0;
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
->>>>>>> parent of 77e83bc... control 수정
 		end
 		else if (currentState == 4'b1011) begin // state 11
 			// JAL or JALR WB
 			RegDst=1;
 			RegWrite=1;
 			MemtoReg=0;
-			
+			$display("state 11");
+
 			//PCWrite=1;
 			PCWrite=0;
 		end
@@ -405,13 +387,10 @@ module Control (
 			if (funct3 == 3'b001 || funct3 == 3'b101) Concat_control=3'b110; // SLLI or SRLI or SRAI
 			else Concat_control=3'b011;
 <<<<<<< HEAD
-<<<<<<< HEAD
 			$display("state 12");
 =======
 			PCWrite=0;
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
->>>>>>> parent of 77e83bc... control 수정
 		end
 		else if (currentState == 4'b1101) begin // state 13
 			// AUIPC or LUI EX
@@ -421,19 +400,17 @@ module Control (
 			Jump=0;
 			Concat_control=3'b001;
 <<<<<<< HEAD
-<<<<<<< HEAD
 			$display("state 13");
 =======
 			PCWrite=0;
 >>>>>>> 6a16095378230d5490e7462c3d1c90c4f8f93922
-=======
->>>>>>> parent of 77e83bc... control 수정
 		end
 		else if (currentState == 4'b1110) begin // state 14
 			// LUI WB
 			RegDst=1;
 			MemtoReg=0;
 			RegWrite=1;
+			$display("state 14");
 
 			//PCWrite=1;
 			PCWrite=0;
@@ -443,7 +420,8 @@ module Control (
 			RegDst=1;
 			MemtoReg=0;
 			RegWrite=1;
-			
+			$display("state 15");
+
 			//PCWrite=1;
 			PCWrite=0;
 		end
