@@ -37,6 +37,7 @@ module RISCV_TOP (
 	wire [3:0] BE;
 	Control control(
 		.CLK(CLK), //input
+		.RSTn(RSTn),
 		.opcode(I_MEM_DI[6:0]),
 		.funct3(I_MEM_DI[14:12]),
    		.RegDst(RegDst),       //output
@@ -102,9 +103,11 @@ module RISCV_TOP (
 	assign Branch_Target = offset + PC;
 	assign Branch_Taken = Branch & Zero;
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
-	always @(posedge PCWrite) begin
-		PC <= NXT_PC;
-		I_MEM_ADDR <= NXT_PC[11:0];
+	always @(posedge CLK) begin
+		if (~RSTn || PCWrite) begin
+			PC<= NXT_PC;
+			I_MEM_ADDR <= NXT_PC[11:0];
+		end
 	end
 	assign I_MEM_CSN = (~RSTn)? 1'b1 : 1'b0;
 
