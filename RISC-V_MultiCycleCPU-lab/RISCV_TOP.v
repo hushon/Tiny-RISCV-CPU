@@ -32,13 +32,6 @@ module RISCV_TOP (
 	initial begin
 		NUM_INST <= 0;
 	end
-
-	// Only allow for NUM_INST
-	always @ (negedge CLK) begin
-		if (RSTn) NUM_INST <= NUM_INST + 1;
-	end
-
-	// TODO: implement
 	wire [6:0] ALUOp;
 	wire [2:0] Concat_control;
 	wire [3:0] BE;
@@ -61,6 +54,13 @@ module RISCV_TOP (
 		.Concat_control(Concat_control),
 		.PCWrite(PCWrite)
    		);
+
+	// Only allow for NUM_INST
+	always @ (posedge PCWrite) begin
+		if (RSTn) NUM_INST <= NUM_INST + 1;
+	end
+
+
 
 	wire [4:0] ALU_operation;
 	ALUControl alucontrol(
@@ -102,7 +102,7 @@ module RISCV_TOP (
 	assign Branch_Target = offset + PC;
 	assign Branch_Taken = Branch & Zero;
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
-	always @(PCWrite) begin
+	always @(posedge PCWrite) begin
 		PC <= NXT_PC;
 		I_MEM_ADDR <= NXT_PC[11:0];
 	end

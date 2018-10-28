@@ -107,7 +107,7 @@ module Control (
 			RegDst=0;
 			Jump=0;
 			Branch=0;
-			MemRead=0;
+			MemRead=1;
 			MemtoReg=1'bx;
 			ALUOp=opcode;
 			MemWrite=0;
@@ -117,11 +117,12 @@ module Control (
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
 			Concat_control=3'b000;
-			PCWrite=0;
+			PCWrite=1;
 		end
 		else if (currentState == 4'b0001) begin // state 1
 			// ID stage (common)
 			// do nothing since RegRead is always yes
+			PCWrite=0;
 		end
 		else if (currentState == 4'b0010) begin // state 2
 			// LW or SW EX
@@ -147,17 +148,22 @@ module Control (
 			RegDst=1;
 			RegWrite=1;
 			MemtoReg=1;
+
+			//PCWrite=1;
 		end
 		else if (currentState == 4'b0101) begin // state 5
 			// SW MEM
 			MemWrite=1;
 			MemRead=0;
+
 			case (funct3)
 				3'b000: BE=4'b0001; // SB
 				3'b001: BE=4'b0011; // SH
 				3'b010: BE=4'b1111; // SW
 				default: ; 
 			endcase
+
+			//PCWrite=1;
 		end
 		else if (currentState == 4'b0110) begin // state 6
 			// Rtype EX
@@ -170,6 +176,8 @@ module Control (
 			RegDst=1;
 			RegWrite=1;
 			MemtoReg=0;
+
+			//PCWrite=1;
 		end
 		else if (currentState == 4'b1000) begin // state 8
 			// Branch EX
@@ -179,7 +187,8 @@ module Control (
 			Branch=1;
 			Jump=0;
 			Concat_control=3'b100;
-			PCWrite=1;
+			
+			//PCWrite=1;
 		end
 		else if (currentState == 4'b1001) begin // state 9
 			// JAL EX
@@ -204,7 +213,8 @@ module Control (
 			RegDst=1;
 			RegWrite=1;
 			MemtoReg=0;
-			PCWrite=1;
+			
+			//PCWrite=1;
 		end
 		else if (currentState == 4'b1100) begin // state 12
 			// Itype EX
@@ -228,13 +238,16 @@ module Control (
 			RegDst=1;
 			MemtoReg=0;
 			RegWrite=1;
+
+			//PCWrite=1;
 		end
 		else if (currentState == 4'b1110) begin // state 15
 			// AUIPC WB
 			RegDst=1;
 			MemtoReg=0;
 			RegWrite=1;
-			PCWrite=1;
+			
+			//PCWrite=1;
 		end
 	end
 	/* -------------- */
