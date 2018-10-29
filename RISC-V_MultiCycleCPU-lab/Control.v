@@ -47,6 +47,7 @@ module Control (
 			if (isLW || isSW) next_currentState = 4'b0010;
 			else if (isRtype) next_currentState = 4'b0110;
 			else if (isBranch) next_currentState = 4'b1000;
+			else if (isJAL) next_currentState = 4'b1001;
 			else if (isJALR) next_currentState = 4'b1010;
 			else if (isItype) next_currentState = 4'b1100;
 			else if (isAUIPC || isLUI) next_currentState = 4'b1101;
