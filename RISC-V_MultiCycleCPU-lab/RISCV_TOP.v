@@ -56,10 +56,10 @@ module RISCV_TOP (
    		);
 
 	// Only allow for NUM_INST
-	always @ (posedge PCWrite) begin
-		if (RSTn) NUM_INST <= NUM_INST + 1;
+	always @ (negedge PCWrite) begin
+		if (RSTn) NUM_INST <= NUM_INST+1;
+		$display("+1 to NUM_INST");
 	end
-
 
 
 	wire [4:0] ALU_operation;
@@ -103,12 +103,11 @@ module RISCV_TOP (
 	assign Branch_Taken = Branch & Zero;
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
 	always @(posedge PCWrite) begin
-		PC <= NXT_PC;
-		I_MEM_ADDR <= NXT_PC[11:0];
+			PC<= NXT_PC;
+			I_MEM_ADDR <= NXT_PC[11:0];
+			$display("PC update");
 	end
 	assign I_MEM_CSN = (~RSTn)? 1'b1 : 1'b0;
-
-
 
 
 	//Data Memory Output
@@ -317,4 +316,3 @@ module ALU(
 	
 
 endmodule
-

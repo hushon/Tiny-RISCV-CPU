@@ -16,8 +16,7 @@ module Control (
 	output reg JALorJALR,
 	output reg [3:0] BE,
 	output reg [2:0] Concat_control,
-	output reg PCWrite,
-	output reg IRWrite
+	output reg PCWrite
 	);
 
 	// flags
@@ -121,14 +120,11 @@ module Control (
 			BE=4'bxxxx;
 			Concat_control=3'b000;
 			PCWrite=1;
-			IRWrite=1;
 			$display("state 0");
 		end
 		else if (currentState == 4'b0001) begin // state 1
 			// ID stage (common)
 			// do nothing since RegRead is always yes
-			PCWrite=0;
-			IRWrite=0;
 			$display("state 1");
 		end
 		else if (currentState == 4'b0010) begin // state 2
@@ -136,8 +132,8 @@ module Control (
 			ALUSrc1=0;
 			ALUSrc2=1;
 			// this needs to be fixed soon
-			if(isLW) Concat_control=3'b101;
-			else if(isSW) Concat_control=3'b011;
+			if(isLW) Concat_control=3'b011;
+			else if(isSW) Concat_control=3'b101;
 
 		$display("state 2");
 		end
@@ -192,6 +188,7 @@ module Control (
 			$display("state 7");
 
 			//PCWrite=1;
+			PCWrite=0;
 		end
 		else if (currentState == 4'b1000) begin // state 8
 			// Branch EX
@@ -215,7 +212,6 @@ module Control (
 			Concat_control=3'b010;
 
 			PCWrite=0;
-			IRWrite=0;
 			$display("state 9");
 		end
 		else if (currentState == 4'b1010) begin // state 10
