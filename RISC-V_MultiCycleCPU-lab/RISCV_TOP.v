@@ -39,6 +39,7 @@ module RISCV_TOP (
 		.CLK(CLK), //input
 		.opcode(I_MEM_DI[6:0]),
 		.funct3(I_MEM_DI[14:12]),
+		.RSTn(RSTn),
    		.RegDst(RegDst),       //output
    		.Jump(Jump),
 		.Branch(Branch),

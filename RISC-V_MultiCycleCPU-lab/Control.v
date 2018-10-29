@@ -2,6 +2,7 @@ module Control (
 	input wire CLK,
 	input wire [6:0] opcode,
 	input wire [2:0] funct3,
+	input wire RSTn,
 
 	output reg RegDst,
 	output reg Jump,
@@ -96,13 +97,13 @@ module Control (
 	end
 
 	always @(posedge CLK) begin
-		currentState <= next_currentState;
+		if (RSTn) currentState <= next_currentState;
 	end
 	/* ---------------- */
 
 
 	/* control signal for each stage */
-	always @(posedge CLK) begin
+	always @(*) begin
 		if (currentState == 4'b0000) begin // state 0 
 			// IF stage (common)
 			// initialize control signals
