@@ -158,6 +158,7 @@ module Control (
 			$display("state 4");
 
 			//PCWrite=1;
+			PCWrite=0;
 		end
 		else if (currentState == 4'b0101) begin // state 5
 			// SW MEM
@@ -173,6 +174,7 @@ module Control (
 			$display("state 5");
 
 			//PCWrite=1;
+			PCWrite=0;
 		end
 		else if (currentState == 4'b0110) begin // state 6
 			// Rtype EX
@@ -202,6 +204,7 @@ module Control (
 			$display("state 8");
 			
 			//PCWrite=1;
+			PCWrite=0;
 		end
 		else if (currentState == 4'b1001) begin // state 9
 			// JAL EX
@@ -233,6 +236,7 @@ module Control (
 			$display("state 11");
 
 			//PCWrite=1;
+			PCWrite=0;
 		end
 		else if (currentState == 4'b1100) begin // state 12
 			// Itype EX
@@ -261,6 +265,7 @@ module Control (
 			$display("state 14");
 
 			//PCWrite=1;
+			PCWrite=0;
 		end
 		else if (currentState == 4'b1110) begin // state 15
 			// AUIPC WB
@@ -270,6 +275,7 @@ module Control (
 			$display("state 15");
 
 			//PCWrite=1;
+			PCWrite=0;
 		end
 	end
 	/* -------------- */
