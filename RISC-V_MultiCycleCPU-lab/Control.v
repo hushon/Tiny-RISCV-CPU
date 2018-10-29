@@ -78,7 +78,8 @@ module Control (
 				else if (isJAL) nextState = 4'b1001;
 				else if (isJALR) nextState = 4'b1010;
 				else if (isItype) nextState = 4'b1100;
-				else if (isAUIPC || isLUI) nextState = 4'b1101;
+				else if (isLUI) nextState = 4'b1101;
+				else if (isAUIPC) nextState = 4'b1110;
 			end
 			else if (currentState == 4'b0010) begin // state 2
 				if (isLW) nextState = 4'b0011;
@@ -115,11 +116,10 @@ module Control (
 				nextState = 4'b0111;
 			end
 			else if (currentState == 4'b1101) begin // state 13
-				if (isLUI) nextState = 4'b1110;
-				else if (isAUIPC) nextState = 4'b1111;
+				nextState = 4'b1111;
 			end
 			else if (currentState == 4'b1110) begin // state 14
-				nextState = 4'b0000;
+				nextState = 4'b1111;
 			end
 			else if (currentState == 4'b1111) begin // state 15
 				nextState = 4'b0000;
@@ -257,22 +257,22 @@ module Control (
 				endcase
 			end
 			else if (currentState == 4'b1101) begin // state 13
-				// AUIPC or LUI EX
-				ALUSrc1=1;
+				// LUI EX
 				ALUSrc2=1;
 				ALUOp=opcode;
 				Jump=0;
 				Concat_control=3'b001;
 			end
 			else if (currentState == 4'b1110) begin // state 14
-				// LUI WB
-				RegDst=1;
-				MemtoReg=0;
-				RegWrite=1;
-				PCWrite=1;
-			end
-			else if (currentState == 4'b1110) begin // state 15
 				// AUIPC WB
+				ALUSrc1=1;
+				ALUSrc2=1;
+				ALUOp=opcode;
+				Jump=0;
+				Concat_control=3'b001;
+			end
+			else if (currentState == 4'b1111) begin // state 15
+				// LUI or AUIPC WB
 				RegDst=1;
 				MemtoReg=0;
 				RegWrite=1;
