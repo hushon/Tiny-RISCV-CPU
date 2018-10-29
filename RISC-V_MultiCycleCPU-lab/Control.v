@@ -51,11 +51,12 @@ module Control (
 
 	/* ---- state transition ---- */
 	reg [3:0] currentState = 4'b0000;
-	reg [3:0] nextState;
+	reg [3:0] nextState = 4'b0000;
 
 	always @(posedge CLK) begin
 		if (~RSTn) begin
 			currentState = 4'b0000;
+			nextState = 4'b0000;
 		end
 		else begin
 			currentState = nextState;
