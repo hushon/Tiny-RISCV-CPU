@@ -29,9 +29,7 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT
 	);
 
-	/*initial begin
-		NUM_INST <= 0;
-	end*/
+	/* ---- instantiate modules ---- */
 	wire [6:0] ALUOp;
 	wire [2:0] Concat_control;
 	wire [3:0] BE;
@@ -55,18 +53,6 @@ module RISCV_TOP (
 		.Concat_control(Concat_control),
 		.PCWrite(PCWrite)
    		);
-
-	// Only allow for NUM_INST
-	always @ (negedge CLK) begin
-		if (~RSTn) begin
-			NUM_INST = 0;
-		end
-		if (PCWrite) begin
-			NUM_INST = NUM_INST+1;
-			$display("+1 to NUM_INST");
-		end
-	end
-
 
 	wire [4:0] ALU_operation;
 	ALUControl alucontrol(
@@ -100,9 +86,24 @@ module RISCV_TOP (
 		.Zero(Zero),    //output
 		.ALU_Result(ALU_Result)  
 		);
+	/* ---------------- */
 
+	/* ---- update NUM_INST ---- */
+	initial begin
+		NUM_INST = 0;
+	end
 
-	//PC update
+	always @ (negedge CLK) begin
+		if (~RSTn) begin
+			NUM_INST = 0;
+		end
+		if (PCWrite) begin
+			NUM_INST = NUM_INST+1;
+		end
+	end
+	/* ---------------- */
+
+	/* ---- PC update ---- */
 	assign JAL_Address = ALU_Result;
 	assign JALR_Address = ALU_Result & (32'hfffffffe);
 	assign Branch_Target = offset + PC;
@@ -116,7 +117,6 @@ module RISCV_TOP (
 		else if (PCWrite) begin
 			PC = NXT_PC;
 			I_MEM_ADDR = NXT_PC[11:0];
-			$display("PC update");
 		end
 	end
 	assign I_MEM_CSN = (~RSTn)? 1'b1 : 1'b0;
@@ -143,188 +143,5 @@ module RISCV_TOP (
 	assign HALT = (RF_RD1 == 32'h0000000c) && (I_MEM_DI == 32'h00008067);	
 	
 	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
-
-	// TODO: implement multi-cycle CPU
-endmodule //
-
-
-
-
-
-module Immediate_Concatenator (
-	input wire [31:0] Instr,
-	input wire [2:0] Concat_control,
-	output reg [31:0] offset
-	);
-	reg signed [31:0] signed_offset;
-
-	always@(*) begin
-		case(Concat_control)
-			3'b001 : begin //LUI, AUIPC, U-type 7'b0110111, 7'b0010111
-				signed_offset = {Instr[31:12],12'b0};
-				offset = signed_offset;
-			end
-			3'b010 : begin //JAL , J-type 7'b1101111
-				signed_offset = {Instr[31],Instr[19:12], Instr[20], Instr[30:21],12'b0};
-				offset = signed_offset >>>11;
-			end
-			3'b011 : begin //JALR, Load, I-type 7'b1100111, 7'b0000011, 7'b0010011
-				signed_offset = {Instr[31:20],20'b0};
-				offset = signed_offset >>>20;
-			end
-			3'b100 : begin //Branch, B-type 7'b1100011
-				signed_offset = {Instr[31],Instr[7],Instr[30:25],Instr[11:8],20'b0};
-				offset = signed_offset >>>19;
-			end
-			3'b101 : begin //Store, S-type 7'b0100011
-				signed_offset = {Instr[31:25],Instr[11:7],20'b0};
-				offset = signed_offset >>>20;
-			end
-			3'b110 : begin // SLLI, SRLI, SRAI
-				offset = {27'b0,Instr[24:20]} ;
-			end
-			default : offset = 0;
-
-		endcase
-	end
-
-endmodule
-
-module ALU(
-	input wire [31:0] Operand1,
-	input wire [31:0] Operand2,
-	input wire [4:0] ALU_operation,
-	output reg Zero,
-	output reg [31:0] ALU_Result
-	);
-	
-	reg signed [31:0] signed_Operand1;
-	reg signed [31:0] signed_Operand2;
-	always@(*) begin
-		case(ALU_operation)
-			5'b00000: begin    // signed Add  / AUIPC
-				signed_Operand1 = Operand1; 
-				signed_Operand2 = Operand2; 
-				ALU_Result = signed_Operand1 + signed_Operand2; 
-				Zero = 1'b0;
-			end
-			5'b00001: begin // signed Sub
-				signed_Operand1 = Operand1; 
-				signed_Operand2 = Operand2; 
-				ALU_Result = signed_Operand1 - signed_Operand2; 
-				Zero = 1'b0;
-			end
-			5'b00010: begin
-				ALU_Result = Operand1 & Operand2; 
-				Zero = 1'b0;
-			end
-			5'b00011: begin
-				ALU_Result = Operand1 | Operand2; 
-				Zero = 1'b0;
-			end
-			5'b00100: begin
-				ALU_Result = ~(Operand1 & Operand2); 
-				Zero = 1'b0;
-			end
-			5'b00101: begin 
-				ALU_Result = ~(Operand1 | Operand2); 
-				Zero = 1'b0;
-			end
-			5'b00110: begin 
-				ALU_Result = Operand1 ^ Operand2; 
-				Zero = 1'b0;
-			end
-			5'b00111: begin
-				ALU_Result = Operand1 ~^ Operand2; 
-				Zero = 1'b0;
-			end
-			5'b01000: begin
-				ALU_Result = Operand2; 
-				Zero = 1'b0;
-			end
-			5'b01001: begin
-				ALU_Result = ~Operand2; 
-				Zero = 1'b0;
-			end
-			5'b01010: begin
-				ALU_Result = Operand1>>Operand2; 
-				Zero = 1'b0;
-			end
-			5'b01011: begin
-				signed_Operand1 = Operand1; 
-				ALU_Result = signed_Operand1>>>Operand2; 
-				Zero = 1'b0;
-			end
-
-			5'b01100: begin
-				ALU_Result = Operand1 + Operand2; 
-				Zero = 1'b0; // Unsigned Add
-			end
-
-			5'b01101: begin
-				ALU_Result = Operand1<<Operand2; 
-				Zero = 1'b0;
-			end
-			5'b01110: begin 
-				ALU_Result = Operand1<<<Operand2; 
-				Zero = 1'b0;
-			end
-		
-			5'b01111: begin
-				ALU_Result = Operand1 - Operand2; 
-				Zero = 1'b0; // Unsigned Sub
-			end
-
-			5'b10000: begin
-				ALU_Result = (Operand1 == Operand2); 
-				Zero = (Operand1 == Operand2); // BEQ
-			end
-			5'b10001: begin
-				ALU_Result = (Operand1 != Operand2); 
-				Zero = (Operand1 != Operand2); // BNE
-			end
-			5'b10010: begin
-				   // BLT
-				signed_Operand1 = Operand1; 
-				signed_Operand2 = Operand2; 
-				ALU_Result = (signed_Operand1 < signed_Operand2);
-				Zero = (signed_Operand1 < signed_Operand2);
-			end
-			5'b10011: begin
-				  // BGE
-				signed_Operand1 = Operand1; 
-				signed_Operand2 = Operand2; 
-				ALU_Result = (signed_Operand1 >= signed_Operand2);
-				Zero = (signed_Operand1 >= signed_Operand2);
-			end
-			5'b10100: begin
-				ALU_Result = (Operand1 < Operand2);
-				Zero = (Operand1 < Operand2); //BLTU
-			end
-			5'b10101: begin
-				ALU_Result = (Operand1 >= Operand2);
-				Zero = (Operand1 >= Operand2); //BGEU
-			end
-
-			5'b10110:begin   // SLTI, SLT
-				signed_Operand1 = Operand1; 
-				signed_Operand2 = Operand2; 
-				ALU_Result = (signed_Operand1 < signed_Operand2);
-				Zero = 0; 
-			end
-			5'b10111: begin
-				ALU_Result = (Operand1 < Operand2);
-				Zero = 0; //SLTIU , SLTU
-			end
-			default: begin
-				signed_Operand1 = Operand1; 
-				signed_Operand2 = Operand2; 
-				ALU_Result = signed_Operand1 + signed_Operand2; 
-				Zero = 1'b0;
-			end
-		endcase
-
-	end
-	
 
 endmodule
