@@ -103,12 +103,15 @@ module RISCV_TOP (
 	end
 	/* ---------------- */
 
-	/* ---- PC update ---- */
 	assign JAL_Address = ALU_Result;
 	assign JALR_Address = ALU_Result & (32'hfffffffe);
 	assign Branch_Target = offset + PC;
 	assign Branch_Taken = Branch & Zero;
+	assign I_MEM_CSN = (~RSTn)? 1'b1 : 1'b0;
+
+	// PC update
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
+
 	always @(posedge CLK) begin
 		if (~RSTn) begin
 			PC = 0;
@@ -119,7 +122,6 @@ module RISCV_TOP (
 			I_MEM_ADDR = NXT_PC[11:0];
 		end
 	end
-	assign I_MEM_CSN = (~RSTn)? 1'b1 : 1'b0;
 
 
 	//Data Memory Output
