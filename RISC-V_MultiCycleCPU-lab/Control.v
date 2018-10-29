@@ -215,7 +215,6 @@ module Control (
 			JALorJALR=0;
 			Concat_control=3'b010;
 
-			PCWrite=0;
 			$display("state 9");
 		end
 		else if (currentState == 4'b1010) begin // state 10
@@ -230,6 +229,7 @@ module Control (
 		end
 		else if (currentState == 4'b1011) begin // state 11
 			// JAL or JALR WB
+			Jump=1;
 			RegDst=1;
 			RegWrite=1;
 			MemtoReg=0;
