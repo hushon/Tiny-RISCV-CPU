@@ -29,9 +29,9 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT
 	);
 
-	initial begin
+	/*initial begin
 		NUM_INST <= 0;
-	end
+	end*/
 	wire [6:0] ALUOp;
 	wire [2:0] Concat_control;
 	wire [3:0] BE;
@@ -57,9 +57,14 @@ module RISCV_TOP (
    		);
 
 	// Only allow for NUM_INST
-	always @ (negedge PCWrite) begin
-		if (RSTn) NUM_INST <= NUM_INST+1;
-		$display("+1 to NUM_INST");
+	always @ (negedge CLK) begin
+		if (~RSTn) begin
+			NUM_INST = 0;
+		end
+		if (PCWrite) begin
+			NUM_INST = NUM_INST+1;
+			$display("+1 to NUM_INST");
+		end
 	end
 
 
@@ -103,10 +108,16 @@ module RISCV_TOP (
 	assign Branch_Target = offset + PC;
 	assign Branch_Taken = Branch & Zero;
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
-	always @(posedge PCWrite) begin
-			PC<= NXT_PC;
-			I_MEM_ADDR <= NXT_PC[11:0];
+	always @(posedge CLK) begin
+		if (~RSTn) begin
+			PC = 0;
+			I_MEM_ADDR = 0;
+		end
+		else if (PCWrite) begin
+			PC = NXT_PC;
+			I_MEM_ADDR = NXT_PC[11:0];
 			$display("PC update");
+		end
 	end
 	assign I_MEM_CSN = (~RSTn)? 1'b1 : 1'b0;
 
