@@ -29,6 +29,17 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT
 	);
 
+	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
+
+	initial begin
+		NUM_INST <= 0;
+	end
+
+	// Only allow for NUM_INST
+	always @ (negedge CLK) begin
+		if (RSTn && PCWrite) NUM_INST <= NUM_INST + 1;
+	end
+
 	/* ---- instantiate modules ---- */
 	wire [6:0] ALUOp;
 	wire [2:0] Concat_control;
@@ -88,21 +99,6 @@ module RISCV_TOP (
 		);
 	/* ---------------- */
 
-	/* ---- update NUM_INST ---- */
-	initial begin
-		NUM_INST = 0;
-	end
-
-	always @ (negedge CLK) begin
-		if (~RSTn) begin
-			NUM_INST = 0;
-		end
-		if (PCWrite) begin
-			NUM_INST = NUM_INST+1;
-		end
-	end
-	/* ---------------- */
-
 	assign JAL_Address = ALU_Result;
 	assign JALR_Address = ALU_Result & (32'hfffffffe);
 	assign Branch_Target = offset + PC;
@@ -144,6 +140,6 @@ module RISCV_TOP (
 	//Check two sequence of instructions for HALT
 	assign HALT = (RF_RD1 == 32'h0000000c) && (I_MEM_DI == 32'h00008067);	
 	
-	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
+	
 
 endmodule
