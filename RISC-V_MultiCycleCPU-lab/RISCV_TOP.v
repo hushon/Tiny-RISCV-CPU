@@ -29,17 +29,6 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT
 	);
 
-	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
-
-	initial begin
-		NUM_INST <= 0;
-	end
-
-	// Only allow for NUM_INST
-	always @ (negedge CLK) begin
-		if (RSTn && PCWrite) NUM_INST <= NUM_INST + 1;
-	end
-
 	/* ---- instantiate modules ---- */
 	wire [6:0] ALUOp;
 	wire [2:0] Concat_control;
@@ -97,6 +86,19 @@ module RISCV_TOP (
 		.Zero(Zero),    //output
 		.ALU_Result(ALU_Result)  
 		);
+	/* ---------------- */
+
+	/* --- for testbench --- */
+	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
+
+	initial begin
+		NUM_INST <= 0;
+	end
+
+	// Only allow for NUM_INST
+	always @ (negedge CLK) begin
+		if (RSTn && PCWrite) NUM_INST <= NUM_INST + 1;
+	end
 	/* ---------------- */
 
 	assign JAL_Address = ALU_Result;
