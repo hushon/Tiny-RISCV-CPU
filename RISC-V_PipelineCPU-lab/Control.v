@@ -10,7 +10,7 @@ module Control (
 	output reg [6:0] ALUOp,
 	output reg MemWrite,
 	output reg ALUSrc1,
-	output reg ALUSrc2,
+	output reg [1:0] ALUSrc2,
 	output reg RegWrite,
 	output reg JALorJALR,
 	output reg [3:0] BE,
