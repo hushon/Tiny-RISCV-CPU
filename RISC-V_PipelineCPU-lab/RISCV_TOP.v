@@ -166,8 +166,8 @@ module RISCV_TOP (
 	
 	always @(posedge CLK) begin
 		if (~RSTn) begin
-			PC = 0;
-			I_MEM_ADDR = 0;
+			PC <= 0;
+			I_MEM_ADDR <= 0;
 		end
 		if (PCWrite) begin
 			PC <= NXT_PC;
