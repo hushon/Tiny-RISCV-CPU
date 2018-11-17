@@ -1,8 +1,8 @@
 	module Hazard_detect(
-		input wire rd_ex,  //input
+		input wire [4:0] rd_ex,  //input
 		input wire MemRead_ex,
-		input wire rs1_id,
-		input wire rs2_id,  
+		input wire [4:0] rs1_id,
+		input wire [4:0] rs2_id,  
 		
 		output reg load_delay,   //output
 		output reg PCWrite,

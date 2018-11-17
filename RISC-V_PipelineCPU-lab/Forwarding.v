@@ -1,10 +1,10 @@
 	module Forwarding(
-		input wire rd_mem,   // input
-		input wire rd_wb,
+		input wire [4:0] rd_mem,   // input
+		input wire [4:0] rd_wb,
 		input wire RegWrite_wb,
 		input wire RegWrite_mem,
-		input wire rs1_ex,
-		input wire rs2_ex,
+		input wire [4:0] rs1_ex,
+		input wire [4:0] rs2_ex,
 		
 		output reg [1:0] forwardA,   //output
 		output reg [1:0] forwardB
@@ -17,7 +17,7 @@
 
 		always @(*) begin
 
-			if ((rs_ex!=0) && ((rs1_ex==rd_mem)||(rs2_ex==rd_mem)) && RegWrite_mem) begin // forward operand from MEM stage
+			if (((rs1_ex==rd_mem)||(rs2_ex==rd_mem)) && RegWrite_mem) begin // forward operand from MEM stage
 				forwardA = (rs1_ex==rd_mem)? 2'b01 : 2'b00;
 				forwardB = (rs2_ex==rd_mem)? 2'b01 : 2'b00;
 				/* if (rs1_ex==rd_mem) begin
@@ -29,7 +29,7 @@
 					forwardB = 2'b01;
 				end */
 			end
-			else if ((rs_ex!=0) && ((rs1_ex==rd_wb)||(rs2_ex==rd_wb)) && RegWrite_wb) begin // forward operand from WB stage
+			else if (((rs1_ex==rd_wb)||(rs2_ex==rd_wb)) && RegWrite_wb) begin // forward operand from WB stage
 				forwardA = (rs1_ex==rd_wb)? 2'b01 : 2'b00;
 				forwardB = (rs2_ex==rd_wb)? 2'b01 : 2'b00;
 				/* if (rs1_ex==rd_wb) begin
