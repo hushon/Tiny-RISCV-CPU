@@ -27,7 +27,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=1'bx;
-			ALUSrc2=1;
+			ALUSrc2=2'b01;
 			RegWrite=1;
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
@@ -42,7 +42,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=1;
-			ALUSrc2=1;
+			ALUSrc2=2'b01;
 			RegWrite=1;
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
@@ -57,7 +57,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=0;
-			ALUSrc2=0;
+			ALUSrc2=2'b00;
 			RegWrite=1;
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
@@ -72,7 +72,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=0;
-			ALUSrc2=1;
+			ALUSrc2=2'b01;
 			RegWrite=1;
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
@@ -88,7 +88,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=0;
-			ALUSrc2=1;
+			ALUSrc2=2'b01;
 			RegWrite=1;
 			JALorJALR=1'bx;
 			case (funct3)
@@ -108,7 +108,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=1;
 			ALUSrc1=0;
-			ALUSrc2=1;
+			ALUSrc2=2'b01;
 			RegWrite=0;
 			JALorJALR=1'bx;
 			case (funct3)
@@ -128,7 +128,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=0;
-			ALUSrc2=0;
+			ALUSrc2=2'b00;
 			RegWrite=0;
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
@@ -143,7 +143,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=1;
-			ALUSrc2=1;
+			ALUSrc2=2'b10;
 			RegWrite=1;
 			JALorJALR=0;
 			BE=4'bxxxx;
@@ -158,7 +158,7 @@ module Control (
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=0;
-			ALUSrc2=1;
+			ALUSrc2=2'b10;
 			RegWrite=1;
 			JALorJALR=1;
 			BE=4'bxxxx;
@@ -172,7 +172,7 @@ module Control (
 			MemtoReg=1'bx;
 			ALUOp=7'bxxxxxxx;
 			MemWrite=1'bx;
-			ALUSrc2=1'bx;
+			ALUSrc2=1'bxx;
 			RegWrite=1'bx;
 			BE=4'bxxxx;
 			Concat_control=3'b000;
