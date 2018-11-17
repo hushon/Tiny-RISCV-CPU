@@ -29,16 +29,6 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT      // equal RF_WD this port is used for test
 	);
 
-	initial begin
-		NUM_INST <= 0;
-	end
-
-	// Only allow for NUM_INST
-	always @ (negedge CLK) begin
-		if (RSTn && PCWrite) NUM_INST <= NUM_INST + 1;
-	end
-
-	// TODO: implement
 	//Declare pipeline register
 	reg [200:0] if_id_reg;
 	reg [200:0] id_ex_reg;
@@ -65,7 +55,7 @@ module RISCV_TOP (
 	wire [4:0] rd_wb;
 	wire RegWrite_wb;
 
-
+	/* ---- instantiate modules ---- */
 	Hazard_detect hazarddetect(
 		.rd_ex(rd_ex),  //input
 		.MemRead_ex(MemRead_ex),
@@ -125,6 +115,20 @@ module RISCV_TOP (
 		.Concat_control(Concat_control), 
 		.offset(offset)   //output
 		);
+	/* ---- end instantiate modules ---- */
+
+	/* --- for testbench --- */
+	initial begin
+		NUM_INST <= 0;
+	end
+
+	// Only allow for NUM_INST
+	always @ (negedge CLK) begin
+		if (RSTn && PCWrite) NUM_INST <= NUM_INST + 1;
+	end
+	/* --- end for testbench --- */	
+
+	// TODO: implement
 
 	//Instruction Memory Output
 	wire [31:0] JAL_Address;
