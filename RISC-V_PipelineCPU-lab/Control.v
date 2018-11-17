@@ -5,7 +5,7 @@ module Control (
 	output reg RegDst,
 	output reg Jump,
 	output reg Branch,
-	output reg MemRead, // always set to 1
+	output reg MemRead,
 	output reg MemtoReg,
 	output reg [6:0] ALUOp,
 	output reg MemWrite,
@@ -22,7 +22,7 @@ module Control (
 			RegDst=1;
 			Jump=0;
 			Branch=0;
-			MemRead=1;
+			MemRead=0;
 			MemtoReg=0;
 			ALUOp=opcode;
 			MemWrite=0;
@@ -52,7 +52,7 @@ module Control (
 			RegDst=1;
 			Jump=0;
 			Branch=0;
-			MemRead=1;
+			MemRead=0;
 			MemtoReg=0;
 			ALUOp=opcode;
 			MemWrite=0;
@@ -67,7 +67,7 @@ module Control (
 			RegDst=1;
 			Jump=0;
 			Branch=0;
-			MemRead=1;
+			MemRead=0;
 			MemtoReg=0;
 			ALUOp=opcode;
 			MemWrite=0;
@@ -83,7 +83,7 @@ module Control (
 			RegDst=1;
 			Jump=0;
 			Branch=0;
-			MemRead=1; // always 1
+			MemRead=1;
 			MemtoReg=1;
 			ALUOp=opcode;
 			MemWrite=0;
@@ -103,7 +103,7 @@ module Control (
 			RegDst=1'bx; // don't care
 			Jump=0;
 			Branch=0;
-			MemRead=1;
+			MemRead=0;
 			MemtoReg=1'bx;
 			ALUOp=opcode;
 			MemWrite=1;
@@ -123,7 +123,7 @@ module Control (
 			RegDst=1'bx;
 			Jump=0;
 			Branch=1;
-			MemRead=1;
+			MemRead=0;
 			MemtoReg=1'bx;
 			ALUOp=opcode;
 			MemWrite=0;
@@ -138,7 +138,7 @@ module Control (
 			RegDst=1;
 			Jump=1;
 			Branch=0;
-			MemRead=1;
+			MemRead=0;
 			MemtoReg=1'bx;
 			ALUOp=opcode;
 			MemWrite=0;
@@ -153,7 +153,7 @@ module Control (
 			RegDst=1;
 			Jump=1;
 			Branch=0;
-			MemRead=1;
+			MemRead=0;
 			MemtoReg=1'bx;
 			ALUOp=opcode;
 			MemWrite=0;
