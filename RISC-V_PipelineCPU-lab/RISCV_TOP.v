@@ -34,9 +34,9 @@ module RISCV_TOP (
 	end
 
 	// Only allow for NUM_INST
-	always @ (negedge CLK) begin
+	/* always @ (negedge CLK) begin
 		if (RSTn) NUM_INST <= NUM_INST + 1;
-	end
+	end */
 
 	// TODO: implement
 	//Declare pipeline register
@@ -163,7 +163,8 @@ module RISCV_TOP (
 	assign Branch_Taken = Branch & Zero;
 	assign id_flush = Branch_Taken|Jump; //id_flush signal
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
-	always @(posedge CLK) begin
+	
+	always @(posedge CLK) begin // NEED TO CHANGE TO NEGEDGE
 		if (PCWrite) begin
 			PC <= NXT_PC;
 			I_MEM_ADDR <= NXT_PC[11:0];
