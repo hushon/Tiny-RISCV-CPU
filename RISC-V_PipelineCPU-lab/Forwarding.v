@@ -5,6 +5,8 @@
 		input wire RegWrite_mem,
 		input wire [4:0] rs1_ex,
 		input wire [4:0] rs2_ex,
+		input wire use_rs1_ex,
+		input wire use_rs2_ex,
 		
 		output reg [1:0] forwardA,   //output
 		output reg [1:0] forwardB
@@ -18,10 +20,10 @@
 		always @(*) begin
 
 			// forwardA signal
-			if ((rs1_ex!=0) && (rs1_ex==rd_mem) && RegWrite_mem) begin // forward operand from MEM stage
+			if (use_rs1_ex && (rs1_ex!=0) && (rs1_ex==rd_mem) && RegWrite_mem) begin // forward operand from MEM stage
 				forwardA = 2'b01;
 			end
-			else if ((rs1_ex!=0) && (rs1_ex==rd_wb) && RegWrite_wb) begin // forward operand from WB stage
+			else if (use_rs1_ex && (rs1_ex!=0) && (rs1_ex==rd_wb) && RegWrite_wb) begin // forward operand from WB stage
 				forwardA = 2'b10;
 			end
 			else begin // use the operand from register file
@@ -29,10 +31,10 @@
 			end
 
 			// forwardB signal
-			if ((rs2_ex!=0) && (rs2_ex==rd_mem) && RegWrite_mem) begin // forward operand from MEM stage
+			if (use_rs2_ex &&(rs2_ex!=0) && (rs2_ex==rd_mem) && RegWrite_mem) begin // forward operand from MEM stage
 				forwardB = 2'b01;
 			end
-			else if ((rs2_ex!=0) && (rs2_ex==rd_wb) && RegWrite_wb) begin // forward operand from WB stage
+			else if (use_rs2_ex &&(rs2_ex!=0) && (rs2_ex==rd_wb) && RegWrite_wb) begin // forward operand from WB stage
 				forwardB = 2'b10;
 			end
 			else begin // use the operand from register file

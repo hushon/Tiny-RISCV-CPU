@@ -84,6 +84,8 @@ module RISCV_TOP (
 		.RegWrite_mem(RegWrite_mem),
 		.rs1_ex(rs1_ex),
 		.rs2_ex(rs2_ex),
+		.use_rs1_ex(id_ex_reg[155]),
+		.use_rs2_ex(id_ex_reg[156]),
 		.forwardA(forwardA),   //output
 		.forwardB(forwardB)
 		);
@@ -239,8 +241,10 @@ module RISCV_TOP (
 			id_ex_reg[107:44] <= {RF_RD1,RF_RD2}; // Register Data
 			id_ex_reg[139:108] <= offset;  //offset
 			id_ex_reg[154:140] <={rs1_id, rs2_id,rd_id}; //register 
+			id_ex_reg[156:155] <= {use_rs2_id, use_rs1_id}; // use_rs2_id, use_rs1_id  from control unit
 			id_ex_reg[200] <= if_id_reg[200]; //for num_inst
 			id_ex_reg[199:197] <= {Branch ,Branch_Taken, MemWrite}; // for output port
+
 
 
 			//update EX/MEM Register
@@ -248,6 +252,7 @@ module RISCV_TOP (
 			ex_mem_reg[35:4] <=ALU_Result;
 			ex_mem_reg[67:36] <= id_ex_reg[75:44]; // RF_RD2
 			ex_mem_reg[72:68] <= rd_ex;
+			ex_mem_reg[74:73] <= id_ex_reg[156:155]; // use_rs2_ex, use_rs1_ex from control unit
 			ex_mem_reg[200] <= id_ex_reg[200]; //for num_inst 
 			ex_mem_reg[199:197] <=id_ex_reg[199:197]; // for output port
 
@@ -256,6 +261,7 @@ module RISCV_TOP (
 			mem_wb_reg[33:2] <= D_MEM_DI;
 			mem_wb_reg[65:34] <= ex_mem_reg[35:4]; // ALU_Result
 			mem_wb_reg[70:66] <= rd_mem;
+			mem_wb_reg[72:71] <= ex_mem_reg[74:73]; // use_rs2_mem, use_rs1_mem from control unit
 			mem_wb_reg[200] <= ex_mem_reg[200]; //for num_inst
 			mem_wb_reg[199:197] <= ex_mem_reg[199:197]; // for output port
 		end
