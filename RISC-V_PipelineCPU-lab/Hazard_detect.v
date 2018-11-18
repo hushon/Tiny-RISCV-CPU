@@ -12,9 +12,9 @@
 		);
 
 		initial begin
-			load_delay = 1'bx;
-			PCWrite = 1'bx;
-			IF_ID_Write = 1'bx;
+			load_delay = 1'b0;
+			PCWrite = 1'b1;
+			IF_ID_Write = 1'b1;
 		end
 
 		always @(*) begin

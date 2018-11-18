@@ -186,7 +186,7 @@ module Control (
 		end
 		else begin // when opcode does not belong to any case
 			RegDst=1'bx;
-			Jump=1'bx;
+			Jump=1'b0;
 			Branch=1'bx;
 			MemRead=1'bx;
 			MemtoReg=1'bx;

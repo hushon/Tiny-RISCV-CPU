@@ -29,11 +29,18 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT      // equal RF_WD this port is used for test
 	);
 
-	//Declare pipeline register
+	//Declare and initialize pipeline register
 	reg [200:0] if_id_reg;
 	reg [200:0] id_ex_reg;
 	reg [200:0] ex_mem_reg;
 	reg [200:0] mem_wb_reg;
+
+	initial begin
+		if_id_reg <=0;
+		id_ex_reg <=0;
+		ex_mem_reg <=0;
+		mem_wb_reg <=0;
+	end
 
 	//Declare id stage variables
 	wire [31:0] Inst;
@@ -128,7 +135,8 @@ module RISCV_TOP (
 
 	// Only allow for NUM_INST
 	always @ (negedge CLK) begin
-		if (RSTn && PCWrite) NUM_INST <= NUM_INST + 1;
+		if (RSTn && PCWrite) NUM_INST <= NUM_INST + mem_wb_reg[200];
+		$display("NUM_INST : %0x, mem_wb_reg[200] : %0x " , NUM_INST, mem_wb_reg[200]);
 	end
 	/* --- end for testbench --- */	
 
@@ -173,6 +181,7 @@ module RISCV_TOP (
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
 	
 	always @(posedge CLK) begin
+		$display( "Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x", Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump);
 		if (~RSTn) begin
 			PC <= 0;
 			I_MEM_ADDR <= 0;
@@ -203,35 +212,46 @@ module RISCV_TOP (
 	//pipeline register update
 	always @(posedge CLK) begin
 		//update IF/ID Register
-		if (~id_flush) begin
-			if (IF_ID_Write) begin
-				if_id_reg[31:0]<=PC;
-				if_id_reg[63:32]<=I_MEM_DI;
+		if (~RSTn) begin
+			if_id_reg <=0;
+			id_ex_reg <=0;
+			ex_mem_reg <=0;
+			mem_wb_reg <=0;
+		end
+		else begin 
+			if (~id_flush) begin
+				if (IF_ID_Write) begin
+					if_id_reg[31:0]<=PC;
+					if_id_reg[63:32]<=I_MEM_DI;
+					if_id_reg[200]<=1;  //for num_inst
+				end
 			end
+			else begin
+				if_id_reg <= 0;
+			end
+
+			//update ID/EX Register
+			id_ex_reg[11:0] <= (load_delay)? 0 : {ALUSrc2,ALUSrc1,ALU_operation,MemWrite,MemRead,MemtoReg,RegWrite}; // control signals
+			id_ex_reg[43:12] <= if_id_reg[31:0]; // PC
+			id_ex_reg[107:44] <= {RF_RD1,RF_RD2}; // Register Data
+			id_ex_reg[139:108] <= offset;  //offset
+			id_ex_reg[154:140] <={rs1_id, rs2_id,rd_id}; //register 
+			id_ex_reg[200] <= if_id_reg[200]; //for num_inst
+
+			//update EX/MEM Register
+			ex_mem_reg[3:0] <= id_ex_reg[3:0]; //control signals
+			ex_mem_reg[35:4] <=ALU_Result;
+			ex_mem_reg[67:36] <= id_ex_reg[75:44]; // RF_RD2
+			ex_mem_reg[72:68] <= rd_ex;
+			ex_mem_reg[200] <= id_ex_reg[200]; //for num_inst 
+
+			//update MEM/WB Register
+			mem_wb_reg[1:0] <= ex_mem_reg[1:0]; // control signals
+			mem_wb_reg[33:2] <= D_MEM_DI;
+			mem_wb_reg[65:34] <= ex_mem_reg[35:4]; // ALU_Result
+			mem_wb_reg[70:66] <= rd_mem;
+			mem_wb_reg[200] <= ex_mem_reg[200]; //for num_inst
 		end
-		else begin
-			if_id_reg <= 0;
-		end
-
-		//update ID/EX Register
-		id_ex_reg[11:0] <= (load_delay)? 0 : {ALUSrc2,ALUSrc1,ALU_operation,MemWrite,MemRead,MemtoReg,RegWrite}; // control signals
-		id_ex_reg[43:12] <= if_id_reg[31:0]; // PC
-		id_ex_reg[107:44] <= {RF_RD1,RF_RD2}; // Register Data
-		id_ex_reg[139:108] <= offset;  //offset
-		id_ex_reg[154:140] <={rs1_id, rs2_id,rd_id}; //register 
-
-		//update EX/MEM Register
-		ex_mem_reg[3:0] <= id_ex_reg[3:0]; //control signals
-		ex_mem_reg[35:4] <=ALU_Result;
-		ex_mem_reg[67:36] <= id_ex_reg[75:44]; // RF_RD2
-		ex_mem_reg[72:68] <= rd_ex;
-
-		//update MEM/WB Register
-		mem_wb_reg[1:0] <= ex_mem_reg[1:0]; // control signals
-		mem_wb_reg[33:2] <= D_MEM_DI;
-		mem_wb_reg[65:34] <= ex_mem_reg[35:4]; // ALU_Result
-		mem_wb_reg[70:66] <= rd_mem;
-
 	end
 
 	//Assign ID stage variables
