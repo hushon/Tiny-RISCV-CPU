@@ -18,10 +18,10 @@
 		always @(*) begin
 
 			// forwardA signal
-			if ((rs1_ex==rd_mem) && RegWrite_mem) begin // forward operand from MEM stage
+			if ((rs1_ex!=0) && (rs1_ex==rd_mem) && RegWrite_mem) begin // forward operand from MEM stage
 				forwardA = 2'b01;
 			end
-			else if ((rs1_ex==rd_wb) && RegWrite_wb) begin // forward operand from WB stage
+			else if ((rs1_ex!=0) && (rs1_ex==rd_wb) && RegWrite_wb) begin // forward operand from WB stage
 				forwardA = 2'b10;
 			end
 			else begin // use the operand from register file
@@ -29,10 +29,10 @@
 			end
 
 			// forwardB signal
-			if ((rs2_ex==rd_mem) && RegWrite_mem) begin // forward operand from MEM stage
+			if ((rs2_ex!=0) && (rs2_ex==rd_mem) && RegWrite_mem) begin // forward operand from MEM stage
 				forwardB = 2'b01;
 			end
-			else if ((rs2_ex==rd_wb) && RegWrite_wb) begin // forward operand from WB stage
+			else if ((rs2_ex!=0) && (rs2_ex==rd_wb) && RegWrite_wb) begin // forward operand from WB stage
 				forwardB = 2'b10;
 			end
 			else begin // use the operand from register file
