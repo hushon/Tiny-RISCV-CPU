@@ -21,6 +21,11 @@
 			forwardB = 2'bxx;
 		end
 
+		reg [6:0] opSW = 7'b0100011;
+		reg [6:0] opR = 7'b0110011;
+		reg [6:0] opI = 7'b000011;
+		reg [6:0] opLW = 7'b0000011;
+
 		always @(*) begin
 
 			// forwardA signal
@@ -47,5 +52,24 @@
 
 			// writedatasel signal
 
+			// opcode_ex==SW and opcode_mem==(R or I) and rs_ex==rd_mem
+			if (opcode_ex==opSW && (opcode_mem==opR || opcode_mem==opI) && rs2_ex==rd_mem) begin // dist=1 between I/R and SW
+				writedatasel = 2'b01;
+			end
+			// opcode_ex==SW and opcode_mem==LW and rs_ex==rd_mem
+			else if (opcode_ex==opSW && opcode_mem==opLW && rs2_ex==rd_mem) begin // dist=1 between LW and SW
+				writedatasel = 2'b10;
+			end
+			// opcode_ex==SW and opcode_wb==(R or I) and rs_ex==rd_wb
+			else if (opcode_ex==opSW && (opcode_wb==opR || opcode_wb==opI) && (rs2_ex==rd_wb)) begin // dist=2 between I/R and SW
+				writedatasel = 2'b11;
+			end
+			//opcode_ex==SW and opcode_wb==(R or I) and rs2_ex==rd_wb
+			else if (opcode_ex==opSW && opcode_wb==opLW && (rs2_ex==rd_wb)) begin // dist=2 between LW and SW
+				writedatasel = 2'b11;
+			end
+			else begin
+				writedatasel = 2'b00;
+			end
 		end
 	endmodule
