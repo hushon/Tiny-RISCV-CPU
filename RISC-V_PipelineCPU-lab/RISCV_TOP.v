@@ -162,10 +162,10 @@ module RISCV_TOP (
 	//instantiate ALU module
 	wire [31:0] ALU_Result;
 	ALU alu(                                           // ALU_Result         
-		.Operand1( (forwardA[1])? RF_WD:(forwardA[0])?  ex_mem_reg[35:4]:(id_ex_reg[9])? id_ex_reg[43:12]:id_ex_reg[107:76] ),    //input
-		          // (forwardA[1])? RF_WD :(forwardA[0])? ALU_Result : (ALUsr1) ? PC : read data1
-		.Operand2( (forwardB[1])? RF_WD:(forwardB[0])?  ex_mem_reg[35:4]:(id_ex_reg[11])? 4:(id_ex_reg[10])? id_ex_reg[139:108]:id_ex_reg[75:44] ), 
-		          // (forwardB[1])? RF_WD :(forwardB[0])? ALU_Result : (ALUsr2[1]) ? 4 : (ALUsr2[0])? offset : read data2
+		.Operand1( (forwardA == 2'b10)? RF_WD:(forwardA == 2'b01)? ex_mem_reg[35:4] : (id_ex_reg[9])? id_ex_reg[43:12]:id_ex_reg[107:76] ), 
+		          // (forwardA== 2'b1-)? RF_WD :(forwardA == 2'b01)?       ALU_Result : (ALUsr1) ? PC : read data1
+		.Operand2( (forwardB == 2'b10)? RF_WD:(forwardB == 2'b01)? ex_mem_reg[35:4] :(id_ex_reg[11:10] == 2'b10)? 4 : (id_ex_reg[11:10] == 2'b01)? id_ex_reg[139:108] :id_ex_reg[75:44] ),         
+		          // (forwardB == 2'b10)? RF_WD :(forwardB == 2'b01)? ALU_Result : (ALUsr2= 2'b10) ? 4 : (ALUsr2=2'b01)? offset : read data2
 		.ALU_operation(id_ex_reg[8:4]), 
 		.Zero(trash1),    //output
 		// not use this zero
@@ -262,7 +262,7 @@ module RISCV_TOP (
 			//update EX/MEM Register
 			ex_mem_reg[3:0] <= id_ex_reg[3:0]; //control signals
 			ex_mem_reg[35:4] <=ALU_Result;
-			ex_mem_reg[67:36] <= (writedatasel[1])? ( (writedatasel[0])? D_MEM_DI : RF_WD ) : ( (writedatasel[0])? id_ex_reg[75:44] : ex_mem_reg[35:4] ); 
+			ex_mem_reg[67:36] <= (writedatasel==2'b11)? RF_WD : (writedatasel==2'b10)?  D_MEM_DI : (writedatasel==2'b01)? ex_mem_reg[35:4] : id_ex_reg[75:44]; 
 							// writedatasel = 3 : RF_WD ,writedatasel = 2 : D_OUT(Data out from memory) 
 							// writedatasel = 1 : ALU_result(after pipeline) ,writedatasel = 0 : RF_RD2
 			ex_mem_reg[72:68] <= rd_ex;

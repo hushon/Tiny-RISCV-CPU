@@ -19,11 +19,12 @@
 		initial begin
 			forwardA = 2'bxx;
 			forwardB = 2'bxx;
+			writedatasel = 2'bxx;
 		end
 
 		reg [6:0] opSW = 7'b0100011;
 		reg [6:0] opR = 7'b0110011;
-		reg [6:0] opI = 7'b000011;
+		reg [6:0] opI = 7'b0010011;
 		reg [6:0] opLW = 7'b0000011;
 
 		always @(*) begin
