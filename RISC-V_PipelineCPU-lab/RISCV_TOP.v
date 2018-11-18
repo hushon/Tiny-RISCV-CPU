@@ -131,14 +131,16 @@ module RISCV_TOP (
 	/* ---- end instantiate modules ---- */
 
 	/* --- for testbench --- */
+	reg [31:0] cycle;  /// for test erase later 
 	initial begin
 		NUM_INST <= 0;
+		cycle <= 0; /// for test erase later 
 	end
 
 	// Only allow for NUM_INST
 	always @ (negedge CLK) begin
 		if (RSTn && PCWrite) NUM_INST <= NUM_INST + mem_wb_reg[200];
-		$display("NUM_INST : %0x, mem_wb_reg[200] : %0x " , NUM_INST, mem_wb_reg[200]);
+		if (RSTn) cycle <= cycle + 1;
 	end
 	/* --- end for testbench --- */	
 
@@ -183,10 +185,12 @@ module RISCV_TOP (
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
 	
 	always @(posedge CLK) begin
-		$display( "Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x", Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump);
-		$display( "(Branch : %0x)  ? Branch_Taken :%0x : (MemWrite :%0x)? ALU_Result : %0x : RF_WD :%0x", mem_wb_reg[199], mem_wb_reg[198], mem_wb_reg[197], mem_wb_reg[65:34], RF_WD );
-		$display( "MemtoReg : %0x,    D_MEM_OUT : %0x, ALUResult : %0x",  mem_wb_reg[1], mem_wb_reg[33:2], mem_wb_reg[65:34] );
-		$display ("MemRead : %0x, D_MEM_ADDR : %0x", ex_mem_reg[2], ex_mem_reg[35:4] );
+		$display("------------Cycle : %0x , NUM_INST : %0x, PC : %0x mem_wb_reg[200] : %0x  ------------ " ,cycle, NUM_INST,PC, mem_wb_reg[200]);
+		$display(" * I_MEM_DI : %0x", I_MEM_DI);
+		$display( "--------4 cycle before-------OUTPUT_PORT = (Branch : %0x)  ? Branch_Taken :%0x : (MemWrite :%0x)? ALU_Result : %0x : RF_WD :%0x", mem_wb_reg[199], mem_wb_reg[198], mem_wb_reg[197], mem_wb_reg[65:34], RF_WD );
+		$display( "--------4 cycle before -----MemtoReg : %0x, D_MEM_OUT : %0x, ALUResult : %0x",  mem_wb_reg[1], mem_wb_reg[33:2], mem_wb_reg[65:34] );
+		$display ("------- 3 cycle before -----MemRead : %0x, MemWrite : %0x, D_MEM_ADDR : %0x, WriteData : %0x ", ex_mem_reg[2],ex_mem_reg[3] ,ex_mem_reg[17:6], ex_mem_reg[67:36]);
+		$display( "---------1 cycle before--------offset : %0x, Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x, RegWrite: %0x", offset, Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump, RegWrite);
 		if (~RSTn) begin
 			PC <= 0;
 			I_MEM_ADDR <= 0;
@@ -200,7 +204,7 @@ module RISCV_TOP (
 
 
 	//Data Memory Output
-	assign D_MEM_CSN = (~RSTn)? 1'b1 : ex_mem_reg[2]; //(RST)? 1 : MemRead
+	assign D_MEM_CSN = (~RSTn)? 1'b1 : ~ex_mem_reg[2]; //(RST)? 1 : ~MemRead
 	assign D_MEM_DOUT = ex_mem_reg[67:36]; // RF_RD2
 	assign D_MEM_ADDR = ex_mem_reg[17:6];  //ALU_Result[13:2]
 	assign D_MEM_WEN = ~ex_mem_reg[3];

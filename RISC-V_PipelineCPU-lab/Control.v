@@ -115,7 +115,7 @@ module Control (
 			RegDst=1'bx; // don't care
 			Jump=0;
 			Branch=0;
-			MemRead=0;
+			MemRead=1;
 			MemtoReg=1'bx;
 			ALUOp=opcode;
 			MemWrite=1;
