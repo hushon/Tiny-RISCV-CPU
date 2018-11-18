@@ -63,6 +63,7 @@ module RISCV_TOP (
 	wire RegWrite_wb;
 
 	/* ---- instantiate modules ---- */
+	wire [1:0] writedatasel;
 	Hazard_detect hazarddetect(
 		.rd_ex(rd_ex),  //input
 		.MemRead_ex(MemRead_ex),
@@ -70,9 +71,13 @@ module RISCV_TOP (
 		.rs2_id(rs2_id), 
 		.use_rs1_id(use_rs1_id),
 		.use_rs2_id(use_rs2_id),
+		.opcode_ex(id_ex_reg[195:189]),
+		.opcode_mem(ex_mem_reg[195:189]),
+		.opcode_wb(mem_wb_reg[195:189]),
 		.load_delay(load_delay),   //output
 		.PCWrite(PCWrite),
-		.IF_ID_Write(IF_ID_Write)
+		.IF_ID_Write(IF_ID_Write),
+		.writedatasel(writedatasel)
 		);
 
 	wire [1:0] forwardA;
@@ -187,10 +192,10 @@ module RISCV_TOP (
 	always @(posedge CLK) begin
 		$display("------------Cycle : %0x , NUM_INST : %0x, PC : %0x mem_wb_reg[200] : %0x  ------------ " ,cycle, NUM_INST,PC, mem_wb_reg[200]);
 		$display(" * I_MEM_DI : %0x", I_MEM_DI);
-		$display( "--------4 cycle before-------OUTPUT_PORT = (Branch : %0x)  ? Branch_Taken :%0x : (MemWrite :%0x)? ALU_Result : %0x : RF_WD :%0x", mem_wb_reg[199], mem_wb_reg[198], mem_wb_reg[197], mem_wb_reg[65:34], RF_WD );
-		$display( "--------4 cycle before -----MemtoReg : %0x, D_MEM_OUT : %0x, ALUResult : %0x",  mem_wb_reg[1], mem_wb_reg[33:2], mem_wb_reg[65:34] );
-		$display ("------- 3 cycle before -----MemRead : %0x, MemWrite : %0x, D_MEM_ADDR : %0x, WriteData : %0x ", ex_mem_reg[2],ex_mem_reg[3] ,ex_mem_reg[17:6], ex_mem_reg[67:36]);
-		$display( "---------1 cycle before--------offset : %0x, Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x, RegWrite: %0x, PCWrite : %0x ", offset, Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump, RegWrite, PCWrite);
+		$display( "4 cycle before-------OUTPUT_PORT = (Branch : %0x)  ? Branch_Taken :%0x : (MemWrite :%0x)? ALU_Result : %0x : RF_WD :%0x", mem_wb_reg[199], mem_wb_reg[198], mem_wb_reg[197], mem_wb_reg[65:34], RF_WD );
+		$display( "4 cycle before -----MemtoReg : %0x, D_MEM_OUT : %0x, ALUResult : %0x",  mem_wb_reg[1], mem_wb_reg[33:2], mem_wb_reg[65:34] );
+		$display ("3 cycle before -----MemRead : %0x, MemWrite : %0x, D_MEM_ADDR : %0x, WriteData : %0x ", ex_mem_reg[2],ex_mem_reg[3] ,ex_mem_reg[17:6], ex_mem_reg[67:36]);
+		$display( "1 cycle before--------offset : %0x, Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x, RegWrite: %0x, PCWrite : %0x ", offset, Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump, RegWrite, PCWrite);
 		if (~RSTn) begin
 			PC <= 0;
 			I_MEM_ADDR <= 0;
@@ -246,21 +251,29 @@ module RISCV_TOP (
 			id_ex_reg[139:108] <= offset;  //offset
 			id_ex_reg[154:140] <={rs1_id, rs2_id,rd_id}; //register 
 			id_ex_reg[156:155] <= {use_rs2_id, use_rs1_id}; // use_rs2_id, use_rs1_id  from control unit
+
 			id_ex_reg[200] <= if_id_reg[200]; //for num_inst
 			id_ex_reg[199:197] <= {Branch ,Branch_Taken, MemWrite}; // for output port
 			id_ex_reg[196] <= PCWrite; // for num_inst
+			id_ex_reg[195:189] <= Inst[6:0]; // for data forwarding unit, Opcode(Inst) -> opcode_ex
 
 
 
 			//update EX/MEM Register
 			ex_mem_reg[3:0] <= id_ex_reg[3:0]; //control signals
 			ex_mem_reg[35:4] <=ALU_Result;
-			ex_mem_reg[67:36] <= id_ex_reg[75:44]; // RF_RD2
+			ex_mem_reg[67:36] <= (writedatasel[1])? ( (writedatasel[0])? D_MEM_DI : RF_WD ) : ( (writedatasel[0])? id_ex_reg[75:44] : ex_mem_reg[35:4] ); 
+							// writedatasel = 3 : RF_WD ,writedatasel = 2 : D_OUT(Data out from memory) 
+							// writedatasel = 1 : ALU_result(after pipeline) ,writedatasel = 0 : RF_RD2
 			ex_mem_reg[72:68] <= rd_ex;
 			ex_mem_reg[74:73] <= id_ex_reg[156:155]; // use_rs2_ex, use_rs1_ex from control unit
+
 			ex_mem_reg[200] <= id_ex_reg[200]; //for num_inst 
 			ex_mem_reg[199:197] <=id_ex_reg[199:197]; // for output port
 			ex_mem_reg[196] <= id_ex_reg[196]; // for num_inst
+			ex_mem_reg[195:189]<= id_ex_reg[195:189]; // for data forwarding unit, opcode_ex -> opcode_mem
+
+
 
 			//update MEM/WB Register
 			mem_wb_reg[1:0] <= ex_mem_reg[1:0]; // control signals
@@ -268,9 +281,11 @@ module RISCV_TOP (
 			mem_wb_reg[65:34] <= ex_mem_reg[35:4]; // ALU_Result
 			mem_wb_reg[70:66] <= rd_mem;
 			mem_wb_reg[72:71] <= ex_mem_reg[74:73]; // use_rs2_mem, use_rs1_mem from control unit
+
 			mem_wb_reg[200] <= ex_mem_reg[200]; //for num_inst
 			mem_wb_reg[199:197] <= ex_mem_reg[199:197]; // for output port
 			mem_wb_reg[196] <= ex_mem_reg[196]; // for num_inst
+			mem_wb_reg[195:189] <=ex_mem_reg[195:189]; // for data forwarding unit, opcode_mem -> opcode_wb
 		end
 	end
 

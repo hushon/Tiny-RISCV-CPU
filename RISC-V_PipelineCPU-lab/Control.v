@@ -131,7 +131,7 @@ module Control (
 			endcase
 			Concat_control=3'b101;
 			use_rs1_id = 1;
-			use_rs2_id = 1;
+			use_rs2_id = 0;
 		end
 		else if (opcode == 7'b1100011) begin // isBranch
 			RegDst=1'bx;
