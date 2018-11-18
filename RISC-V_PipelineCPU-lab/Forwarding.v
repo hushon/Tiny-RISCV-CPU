@@ -7,9 +7,13 @@
 		input wire [4:0] rs2_ex,
 		input wire use_rs1_ex,
 		input wire use_rs2_ex,
+		input wire [6:0] opcode_ex,
+		input wire [6:0] opcode_mem,
+		input wire [6:0] opcode_wb,
 		
 		output reg [1:0] forwardA,   //output
-		output reg [1:0] forwardB
+		output reg [1:0] forwardB,
+		output reg [1:0] writedatasel
 		);
 
 		initial begin
@@ -40,6 +44,8 @@
 			else begin // use the operand from register file
 				forwardB = 2'b00;
 			end
+
+			// writedatasel signal
 
 		end
 	endmodule
