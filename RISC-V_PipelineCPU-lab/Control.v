@@ -14,7 +14,9 @@ module Control (
 	output reg RegWrite,
 	output reg JALorJALR,
 	output reg [3:0] BE,
-	output reg [2:0] Concat_control
+	output reg [2:0] Concat_control,
+	output reg use_rs1_id,
+	output reg use_rs2_id
 	);
 
 	always @(*) begin
@@ -32,6 +34,8 @@ module Control (
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
 			Concat_control=3'b001;
+			use_rs1_id = 0;
+			use_rs2_id = 0;
 		end
 		else if (opcode == 7'b0010111) begin // isAUIPC
 			RegDst=1;
@@ -47,6 +51,8 @@ module Control (
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
 			Concat_control=3'b001;
+			use_rs1_id = 0;
+			use_rs2_id = 0;
 		end
 		else if (opcode == 7'b0110011) begin // isRtype
 			RegDst=1;
@@ -62,6 +68,8 @@ module Control (
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
 			Concat_control=3'b000;
+			use_rs1_id = 1;
+			use_rs2_id = 1;
 		end
 		else if (opcode == 7'b0010011) begin // isItype
 			RegDst=1;
@@ -78,6 +86,8 @@ module Control (
 			BE=4'bxxxx;
 			if(funct3 == 3'b001 || funct3 == 3'b101) Concat_control=3'b110; // SLLI or SRLI or SRAI
 			else Concat_control=3'b011;
+			use_rs1_id = 1;
+			use_rs2_id = 0;
 		end
 		else if (opcode == 7'b0000011) begin // isLW
 			RegDst=1;
@@ -98,6 +108,8 @@ module Control (
 				default: ; 
 			endcase
 			Concat_control=3'b011;
+			use_rs1_id = 1;
+			use_rs2_id = 0;
 		end
 		else if (opcode == 7'b0100011) begin // isSW
 			RegDst=1'bx; // don't care
@@ -118,6 +130,8 @@ module Control (
 				default: ; 
 			endcase
 			Concat_control=3'b101;
+			use_rs1_id = 1;
+			use_rs2_id = 1;
 		end
 		else if (opcode == 7'b1100011) begin // isBranch
 			RegDst=1'bx;
@@ -133,6 +147,8 @@ module Control (
 			JALorJALR=1'bx;
 			BE=4'bxxxx;
 			Concat_control=3'b100;
+			use_rs1_id = 1;
+			use_rs2_id = 1;
 		end
 		else if (opcode == 7'b1101111) begin // isJAL
 			RegDst=1;
@@ -148,6 +164,8 @@ module Control (
 			JALorJALR=0;
 			BE=4'bxxxx;
 			Concat_control=3'b010;
+			use_rs1_id = 0;
+			use_rs2_id = 0;
 		end
 		else if (opcode == 7'b1100111) begin // isJALR
 			RegDst=1;
@@ -163,6 +181,8 @@ module Control (
 			JALorJALR=1;
 			BE=4'bxxxx;
 			Concat_control=3'b011;
+			use_rs1_id = 1;
+			use_rs2_id = 0;
 		end
 		else begin // when opcode does not belong to any case
 			RegDst=1'bx;
@@ -176,6 +196,8 @@ module Control (
 			RegWrite=1'bx;
 			BE=4'bxxxx;
 			Concat_control=3'b000;
+			use_rs1_id = 1'bx;
+			use_rs2_id = 1'bx;
 		end
 	end
 endmodule

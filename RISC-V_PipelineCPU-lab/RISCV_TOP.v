@@ -60,7 +60,9 @@ module RISCV_TOP (
 		.rd_ex(rd_ex),  //input
 		.MemRead_ex(MemRead_ex),
 		.rs1_id(rs1_id),
-		.rs2_id(rs2_id),  
+		.rs2_id(rs2_id), 
+		.use_rs1_id(use_rs1_id),
+		.use_rs2_id(use_rs2_id),
 		.load_delay(load_delay),   //output
 		.PCWrite(PCWrite),
 		.IF_ID_Write(IF_ID_Write)
@@ -98,7 +100,9 @@ module RISCV_TOP (
    		.RegWrite(RegWrite),
 		.JALorJALR(JALorJALR),
 		.BE(BE),
-		.Concat_control(Concat_control)
+		.Concat_control(Concat_control),
+		.use_rs1_id(use_rs1_id),
+		.use_rs2_id(use_rs2_id)
    		);
 
 	wire [4:0] ALU_operation;
