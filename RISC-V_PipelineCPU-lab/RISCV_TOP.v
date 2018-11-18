@@ -71,13 +71,9 @@ module RISCV_TOP (
 		.rs2_id(rs2_id), 
 		.use_rs1_id(use_rs1_id),
 		.use_rs2_id(use_rs2_id),
-		.opcode_ex(id_ex_reg[195:189]),
-		.opcode_mem(ex_mem_reg[195:189]),
-		.opcode_wb(mem_wb_reg[195:189]),
 		.load_delay(load_delay),   //output
 		.PCWrite(PCWrite),
-		.IF_ID_Write(IF_ID_Write),
-		.writedatasel(writedatasel)
+		.IF_ID_Write(IF_ID_Write)
 		);
 
 	wire [1:0] forwardA;
@@ -91,8 +87,12 @@ module RISCV_TOP (
 		.rs2_ex(rs2_ex),
 		.use_rs1_ex(id_ex_reg[155]),
 		.use_rs2_ex(id_ex_reg[156]),
+		.opcode_ex(id_ex_reg[195:189]),
+		.opcode_mem(ex_mem_reg[195:189]),
+		.opcode_wb(mem_wb_reg[195:189]),
 		.forwardA(forwardA),   //output
-		.forwardB(forwardB)
+		.forwardB(forwardB),
+		.writedatasel(writedatasel)
 		);
 
 	wire [6:0] ALUOp;
