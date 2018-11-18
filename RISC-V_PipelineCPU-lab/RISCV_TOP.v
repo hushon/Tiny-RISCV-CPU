@@ -182,6 +182,9 @@ module RISCV_TOP (
 	
 	always @(posedge CLK) begin
 		$display( "Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x", Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump);
+		$display( "(Branch : %0x)  ? Branch_Taken :%0x : (MemWrite :%0x)? ALU_Result : %0x : RF_WD :%0x", mem_wb_reg[199], mem_wb_reg[198], mem_wb_reg[197], mem_wb_reg[65:34], RF_WD );
+		$display( "MemtoReg : %0x,    D_MEM_OUT : %0x, ALUResult : %0x",  mem_wb_reg[1], mem_wb_reg[33:2], mem_wb_reg[65:34] );
+		$display ("MemRead : %0x, D_MEM_ADDR : %0x", ex_mem_reg[2], ex_mem_reg[35:4] );
 		if (~RSTn) begin
 			PC <= 0;
 			I_MEM_ADDR <= 0;
@@ -237,6 +240,8 @@ module RISCV_TOP (
 			id_ex_reg[139:108] <= offset;  //offset
 			id_ex_reg[154:140] <={rs1_id, rs2_id,rd_id}; //register 
 			id_ex_reg[200] <= if_id_reg[200]; //for num_inst
+			id_ex_reg[199:197] <= {Branch ,Branch_Taken, MemWrite}; // for output port
+
 
 			//update EX/MEM Register
 			ex_mem_reg[3:0] <= id_ex_reg[3:0]; //control signals
@@ -244,6 +249,7 @@ module RISCV_TOP (
 			ex_mem_reg[67:36] <= id_ex_reg[75:44]; // RF_RD2
 			ex_mem_reg[72:68] <= rd_ex;
 			ex_mem_reg[200] <= id_ex_reg[200]; //for num_inst 
+			ex_mem_reg[199:197] <=id_ex_reg[199:197]; // for output port
 
 			//update MEM/WB Register
 			mem_wb_reg[1:0] <= ex_mem_reg[1:0]; // control signals
@@ -251,6 +257,7 @@ module RISCV_TOP (
 			mem_wb_reg[65:34] <= ex_mem_reg[35:4]; // ALU_Result
 			mem_wb_reg[70:66] <= rd_mem;
 			mem_wb_reg[200] <= ex_mem_reg[200]; //for num_inst
+			mem_wb_reg[199:197] <= ex_mem_reg[199:197]; // for output port
 		end
 	end
 
@@ -278,6 +285,7 @@ module RISCV_TOP (
 	//Check two sequence of instructions for HALT
 	assign HALT = (RF_RD1 == 32'h0000000c) && (Inst == 32'h00008067);	
 	
-	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD; // have to fix this part!!! ambiguous
+	assign OUTPUT_PORT = (mem_wb_reg[199]) ? mem_wb_reg[198] : (mem_wb_reg[197])? mem_wb_reg[65:34] : RF_WD; 
+                       // (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD; 
 
 endmodule //
