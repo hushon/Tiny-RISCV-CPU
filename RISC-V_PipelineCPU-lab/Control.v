@@ -155,7 +155,7 @@ module Control (
 			Jump=1;
 			Branch=0;
 			MemRead=0;
-			MemtoReg=1'bx;
+			MemtoReg=1'b0;
 			ALUOp=opcode;
 			MemWrite=0;
 			ALUSrc1=1;
@@ -172,10 +172,10 @@ module Control (
 			Jump=1;
 			Branch=0;
 			MemRead=0;
-			MemtoReg=1'bx;
+			MemtoReg=1'b0;
 			ALUOp=opcode;
 			MemWrite=0;
-			ALUSrc1=0;
+			ALUSrc1=1;
 			ALUSrc2=2'b10;
 			RegWrite=1;
 			JALorJALR=1;

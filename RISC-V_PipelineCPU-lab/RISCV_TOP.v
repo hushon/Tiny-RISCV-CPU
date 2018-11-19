@@ -191,11 +191,11 @@ module RISCV_TOP (
 	
 	always @(posedge CLK) begin
 		$display("------------Cycle : %0x , NUM_INST : %0x, PC : %0x mem_wb_reg[200] : %0x  ------------ " ,cycle, NUM_INST,PC, mem_wb_reg[200]);
-		$display(" * I_MEM_DI : %0x", I_MEM_DI);
-		$display( "4 cycle before-------OUTPUT_PORT = (Branch : %0x)  ? Branch_Taken :%0x : (MemWrite :%0x)? ALU_Result : %0x : RF_WD :%0x", mem_wb_reg[199], mem_wb_reg[198], mem_wb_reg[197], mem_wb_reg[65:34], RF_WD );
-		$display( "4 cycle before -----MemtoReg : %0x, D_MEM_OUT : %0x, ALUResult : %0x",  mem_wb_reg[1], mem_wb_reg[33:2], mem_wb_reg[65:34] );
-		$display ("3 cycle before -----MemRead : %0x, MemWrite : %0x, D_MEM_ADDR : %0x, WriteData : %0x ", ex_mem_reg[2],ex_mem_reg[3] ,ex_mem_reg[17:6], ex_mem_reg[67:36]);
-		$display( "1 cycle before--------offset : %0x, Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x, RegWrite: %0x, PCWrite : %0x ", offset, Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump, RegWrite, PCWrite);
+		//$display(" * I_MEM_DI : %0x", I_MEM_DI);
+		//$display( "4 cycle before-------OUTPUT_PORT = (Branch : %0x)  ? Branch_Taken :%0x : (MemWrite :%0x)? ALU_Result : %0x : RF_WD :%0x", mem_wb_reg[199], mem_wb_reg[198], mem_wb_reg[197], mem_wb_reg[65:34], RF_WD );
+		//$display( "4 cycle before -----MemtoReg : %0x, D_MEM_OUT : %0x, ALUResult : %0x",  mem_wb_reg[1], mem_wb_reg[33:2], mem_wb_reg[65:34] );
+		//$display ("3 cycle before -----MemRead : %0x, MemWrite : %0x, D_MEM_ADDR : %0x, WriteData : %0x ", ex_mem_reg[2],ex_mem_reg[3] ,ex_mem_reg[17:6], ex_mem_reg[67:36]);
+		//$display( "1 cycle before--------offset : %0x, Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x, RegWrite: %0x, PCWrite : %0x ", offset, Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump, RegWrite, PCWrite);
 		if (~RSTn) begin
 			PC <= 0;
 			I_MEM_ADDR <= 0;
