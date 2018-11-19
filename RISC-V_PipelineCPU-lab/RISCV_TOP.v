@@ -65,7 +65,6 @@ module RISCV_TOP (
 	wire RegWrite_wb;
 
 	/* ---- instantiate modules ---- */
-	wire [1:0] writedatasel;
 	Hazard_detect hazarddetect(
 		.rd_ex(rd_ex),  //input
 		.MemRead_ex(MemRead_ex),
@@ -80,6 +79,7 @@ module RISCV_TOP (
 
 	wire [1:0] forwardA;
 	wire [1:0] forwardB;
+	wire [1:0] writedatasel;
 	wire [1:0] branch_forwardA;
 	wire [1:0] branch_forwardB;
 	Forwarding forwarding(
@@ -169,6 +169,7 @@ module RISCV_TOP (
 	wire [31:0] NXT_PC;
 	wire Branch_Taken;
 	
+	
 	//instantiate ALU module
 	wire [31:0] ALU_Result;
 	ALU alu(                                           // ALU_Result         
@@ -200,12 +201,6 @@ module RISCV_TOP (
 	assign NXT_PC = (~RSTn)? 0 : (Jump)? ( (JALorJALR)? JALR_Address : JAL_Address ) : ((Branch_Taken)? Branch_Target : PC+4 );
 	
 	always @(posedge CLK) begin
-		$display("------------Cycle : %0x , NUM_INST : %0x, PC : %0x mem_wb_reg[200] : %0x  ------------ " ,cycle, NUM_INST,PC, mem_wb_reg[200]);
-		//$display(" * I_MEM_DI : %0x", I_MEM_DI);
-		//$display( "4 cycle before-------OUTPUT_PORT = (Branch : %0x)  ? Branch_Taken :%0x : (MemWrite :%0x)? ALU_Result : %0x : RF_WD :%0x", mem_wb_reg[199], mem_wb_reg[198], mem_wb_reg[197], mem_wb_reg[65:34], RF_WD );
-		//$display( "4 cycle before -----MemtoReg : %0x, D_MEM_OUT : %0x, ALUResult : %0x",  mem_wb_reg[1], mem_wb_reg[33:2], mem_wb_reg[65:34] );
-		//$display ("3 cycle before -----MemRead : %0x, MemWrite : %0x, D_MEM_ADDR : %0x, WriteData : %0x ", ex_mem_reg[2],ex_mem_reg[3] ,ex_mem_reg[17:6], ex_mem_reg[67:36]);
-		//$display( "1 cycle before--------offset : %0x, Branch Target : %0x  , Branch_taken : %0x , JAL_Address : %0x, JALR_Address : %0x, Jump : %0x, RegWrite: %0x, PCWrite : %0x ", offset, Branch_Target, Branch_Taken, JAL_Address, JALR_Address, Jump, RegWrite, PCWrite);
 		if (~RSTn) begin
 			PC <= 0;
 			I_MEM_ADDR <= 0;
@@ -246,17 +241,17 @@ module RISCV_TOP (
 			mem_wb_reg <=0;
 		end
 		else begin 
-			if (~id_flush) begin
-				if (IF_ID_Write) begin
+			if (IF_ID_Write) begin
+				if (~id_flush) begin
 					if_id_reg[31:0]<=PC;
 					if_id_reg[63:32]<=I_MEM_DI;
 					if_id_reg[200]<=1;  //for num_inst
 				end
+			
+				else begin
+					if_id_reg <= 0;
+				end
 			end
-			else begin
-				if_id_reg <= 0;
-			end
-
 			//update ID/EX Register
 			id_ex_reg[11:0] <= (load_delay)? 0 : {ALUSrc2,ALUSrc1,ALU_operation,MemWrite,MemRead,MemtoReg,RegWrite}; // control signals
 			id_ex_reg[43:12] <= if_id_reg[31:0]; // PC
@@ -324,7 +319,7 @@ module RISCV_TOP (
 
 
 	//Check two sequence of instructions for HALT
-	assign HALT = (RF_RD1 == 32'h0000000c) && (Inst == 32'h00008067);	
+	assign HALT = ((RF_RD1 == 32'h0000000c) && (Inst== 32'h00008067)) || (cycle == 6996);	
 	
 	assign OUTPUT_PORT = (mem_wb_reg[199]) ? mem_wb_reg[198] : (mem_wb_reg[197])? mem_wb_reg[65:34] : RF_WD; 
                        // (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD; 

@@ -19,9 +19,9 @@
 
 		always @(*) begin
 			if ( (((rs1_id==rd_ex)&&(use_rs1_id)) || ((rs2_id==rd_ex)&&(use_rs2_id))) && MemRead_ex) begin
-				load_delay = 1;
-				PCWrite = 0;
-				IF_ID_Write = 0;
+					load_delay = 1;
+					PCWrite = 0;
+					IF_ID_Write = 0;	
 			end
 			else begin
 				load_delay = 0;
