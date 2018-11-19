@@ -47,6 +47,8 @@ module RISCV_TOP (
 	wire [4:0] rs1_id;
 	wire [4:0] rs2_id;
 	wire [4:0] rd_id;
+	wire [31:0] branch_forward_dataA;
+	wire [31:0] branch_forward_dataB;
 
 	//Declare ex stage variables
 	wire [4:0] rs1_ex;
@@ -78,21 +80,29 @@ module RISCV_TOP (
 
 	wire [1:0] forwardA;
 	wire [1:0] forwardB;
+	wire [1:0] branch_forwardA;
+	wire [1:0] branch_forwardB;
 	Forwarding forwarding(
-		.rd_mem(rd_mem),   // input
+		.rd_ex(rd_ex), // input
+		.rd_mem(rd_mem),   
 		.rd_wb(rd_wb),
 		.RegWrite_wb(RegWrite_wb),
 		.RegWrite_mem(RegWrite_mem),
+		.rs1_id(rs1_id),
+		.rs2_id(rs2_id),
 		.rs1_ex(rs1_ex),
 		.rs2_ex(rs2_ex),
 		.use_rs1_ex(id_ex_reg[155]),
 		.use_rs2_ex(id_ex_reg[156]),
+		.opcode_id(Inst[6:0]),
 		.opcode_ex(id_ex_reg[195:189]),
 		.opcode_mem(ex_mem_reg[195:189]),
 		.opcode_wb(mem_wb_reg[195:189]),
 		.forwardA(forwardA),   //output
 		.forwardB(forwardB),
-		.writedatasel(writedatasel)
+		.writedatasel(writedatasel),
+		.branch_forwardA(branch_forwardA),
+		.branch_forwardB(branch_forwardB)
 		);
 
 	wire [6:0] ALUOp;
@@ -174,8 +184,8 @@ module RISCV_TOP (
 
 	wire [31:0] trash2; // not use this variable
 	ALU branch_op(
-		.Operand1(RF_RD1),    //input
-		.Operand2(RF_RD2), 
+		.Operand1(branch_forward_dataA),    //input
+		.Operand2(branch_forward_dataB), 
 		.ALU_operation(ALU_operation), 
 		.Zero(Zero),    //output
 		.ALU_Result(trash2)  
@@ -183,7 +193,7 @@ module RISCV_TOP (
 
 	//PC update
 	assign JAL_Address = if_id_reg[31:0] + offset; // PC + offset
-	assign JALR_Address = (RF_RD1 + offset)& (32'hfffffffe);
+	assign JALR_Address = (branch_forward_dataA + offset)& (32'hfffffffe);
 	assign Branch_Target = if_id_reg[31:0] + offset; // PC + offset
 	assign Branch_Taken = Branch & Zero;
 	assign id_flush = Branch_Taken|Jump; //id_flush signal
@@ -207,6 +217,9 @@ module RISCV_TOP (
 	end
 	assign I_MEM_CSN = (~RSTn)? 1'b1 : 1'b0;
 
+	//Branch forwarding data 
+	assign branch_forward_dataA = (branch_forwardA==2'b11)? D_MEM_DI:(branch_forwardA==2'b10)? ex_mem_reg[35:4]:(branch_forwardA==2'b01)? ALU_Result:RF_RD1; 
+	assign branch_forward_dataB = (branch_forwardB==2'b11)? D_MEM_DI:(branch_forwardB==2'b10)? ex_mem_reg[35:4]:(branch_forwardB==2'b01)? ALU_Result:RF_RD2;
 
 	//Data Memory Output
 	assign D_MEM_CSN = (~RSTn)? 1'b1 : ~ex_mem_reg[2]; //(RST)? 1 : ~MemRead
@@ -247,7 +260,7 @@ module RISCV_TOP (
 			//update ID/EX Register
 			id_ex_reg[11:0] <= (load_delay)? 0 : {ALUSrc2,ALUSrc1,ALU_operation,MemWrite,MemRead,MemtoReg,RegWrite}; // control signals
 			id_ex_reg[43:12] <= if_id_reg[31:0]; // PC
-			id_ex_reg[107:44] <= {RF_RD1,RF_RD2}; // Register Data
+			id_ex_reg[107:44] <= {branch_forward_dataA,branch_forward_dataB}; // Register Data
 			id_ex_reg[139:108] <= offset;  //offset
 			id_ex_reg[154:140] <={rs1_id, rs2_id,rd_id}; //register 
 			id_ex_reg[156:155] <= {use_rs2_id, use_rs1_id}; // use_rs2_id, use_rs1_id  from control unit
