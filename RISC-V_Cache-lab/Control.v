@@ -17,7 +17,10 @@ module Control (
 	output reg JALorJALR,
 	output reg [3:0] BE,
 	output reg [2:0] Concat_control,
-	output reg PCWrite
+	output reg PCWrite,
+
+	input wire Cache_RDY,
+	input wire Cache_VALID
 	);
 
 	/* ---- instruction flags ---- */
@@ -86,13 +89,13 @@ module Control (
 				if (isLW) nextState = 4'b0011;
 				else if (isSW) nextState = 4'b0101;
 			end
-			else if (currentState == 4'b0011) begin // state 3
+			else if (currentState == 4'b0011 && Cache_VALID) begin // state 3
 				nextState = 4'b0100;
 			end
 			else if (currentState == 4'b0100) begin // state 4
 				nextState = 4'b0000;
 			end
-			else if (currentState == 4'b0101) begin // state 5
+			else if (currentState == 4'b0101 && Cache_VALID) begin // state 5
 				nextState = 4'b0000;
 			end
 			else if (currentState == 4'b0110) begin // state 6
