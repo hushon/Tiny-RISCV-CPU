@@ -38,9 +38,9 @@ module Cache (
 
 	initial begin
 		timer = 0;
-		//databank = 0;
-		//tagbank = 0;
-		//validbank = 0; // THIS IS NOT CORRECT. ARRAY INITIALIZATION
+		databank = 0;
+		tagbank = 0;
+		validbank = 0; // THIS IS NOT CORRECT. ARRAY INITIALIZATION
 	end
 
 	// clock cycle counter
@@ -51,7 +51,7 @@ module Cache (
 
 	// check cache hit
 	always @(*) begin // MAY HAVE TO CHANGE TO NEGEDGE
-		if (~Cache_CSN) begin
+		if (~CSN) begin
 			tag_hit = tagbank[idx]==tag;
 			valid = validbank[idx];
 			cache_hit = tag_hit && valid;
@@ -63,8 +63,8 @@ module Cache (
 
 	// synchronous cache read
 	always @(negedge CLK) begin
-		if (~Cache_CSN) begin
-			if (~Cache_WEN) begin // READ MODE
+		if (~CSN) begin
+			if (~WEN) begin // READ MODE
 
 				if (cache_hit) begin // read from cache if cache hit
 					Cache_DOUT = databank[idx][(g+1)*32-1 : g*32];
@@ -108,20 +108,20 @@ module Cache (
 
 	// synchronous cache write
 	always @(negedge CLK) begin
-		if (~Cache_CSN) begin
-			if (Cache_WEN) begin // WRITE MODE
+		if (~CSN) begin
+			if (WEN) begin // WRITE MODE
 
-				if (cache_hit) begin // WRITE-THROUGH POLICY
+				if (cache hit) begin // WRITE-THROUGH POLICY
 					// WRITE TO CACHE
 					databank[idx][(g+1)*32-1 : g*32] = Cache_DI;
 					validbank[idx] = 1;
-					// WRITE TO MEMORY
+					// WRITE TO MEMORY MEMORY[ADDR] = D_MEM_DI;
 					D_MEM_CSN = 0; D_MEM_WEN = 1; D_MEM_BE = 4'b1111, D_MEM_ADDR = Cache_ADDR;
 					D_MEM_DI = Cache_DI;
 					RDY = 1;
 					VALID = 1;
 				end
-				else if (~cache_hit) begin // WRITE-ALLOCATE POLICY
+				else if (cache miss) begin // WRITE-ALLOCATE POLICY
 					if (timer == 0) begin
 						RDY = 0;
 						VALID = 0;
@@ -131,28 +131,28 @@ module Cache (
 						D_MEM_CSN = 0; D_MEM_WEN = 1; D_MEM_BE = 4'b1111, D_MEM_ADDR = Cache_ADDR;
 						D_MEM_DI = Cache_DI;
 
-					end
-					else if (timer == 1) begin
 						// LOAD TO CACHE
 						D_MEM_CSN = 0; D_MEM_WEN = 0; D_MEM_BE = 4'b1111, D_MEM_ADDR = {tag, idx, 2'b00}; // load 1st word from memory
 					end
-					else if (timer == 2) begin
+					else if (timer == 1) begin
 						databank[idx][(2'b00+1)*32-1 : 2'b00*32] = D_MEM_DOUT; // save 1st word to cache
 						D_MEM_CSN = 0; D_MEM_WEN = 0; D_MEM_BE = 4'b1111, D_MEM_ADDR = {tag, idx, 2'b01}; // load 2nd word from memory
 					end
-					else if (timer == 3) begin
+					else if (timer == 2) begin
 						databank[idx][(2'b01+1)*32-1 : 2'b01*32] = D_MEM_DOUT; // save 2nd word to cache
 						D_MEM_CSN = 0; D_MEM_WEN = 0; D_MEM_BE = 4'b1111, D_MEM_ADDR = {tag, idx, 2'b10}; // load 3rd word from memory
 					end
-					else if (timer == 4) begin
+					else if (timer == 3) begin
 						databank[idx][(2'b10+1)*32-1 : 2'b10*32] = D_MEM_DOUT; // save 3rd word to cache
 						D_MEM_CSN = 0; D_MEM_WEN = 0; D_MEM_BE = 4'b1111, D_MEM_ADDR = {tag, idx, 2'b11}; // load 4th word from memory
 					end
-					else if (timer == 5) begin
-						// Cache_DOUT = databank[idx][(g+1)*32-1 : g*32]; // output data
+					else if (timer == 4) begin
 						databank[idx][(2'b11+1)*32-1 : 2'b11*32] = MEMORY[{tag, idx, 2'b11}] // save 4th word to cache
 						tagbank[idx] = tag; // update tag bank
 						validbank[idx] = 1; // update valid bank
+					end
+					else if (timer == 5) begin
+						// Cache_DOUT = databank[idx][(g+1)*32-1 : g*32]; // output data
 						RDY = 1;
 						VALID = 1;
 					end
