@@ -88,19 +88,24 @@ module RISCV_TOP (
 		);
 
 	// instantiate Cache module
+	wire Cache_CSN, Cache_WEN;
+	reg [31:0] Cache_DI;
 	wire [31:0] Cache_DOUT;
+	wire [11:0] Cache_ADDR;
+	wire [3:0] Cache_BE;
 	wire RDY, VALID;
-
 	Cache D_Cache (
 		.CLK(CLK),
-		.Cache_DOUT(Cache_DOUT),
+		.Cache_CSN(Cache_CSN),
+		.Cache_DOUT(Cache_DI),
 		.Cache_ADDR(Cache_ADDR),
 		.Cache_WEN(Cache_WEN),
 		.Cache_BE(Cache_BE),
-		.Cache_DI(Cache_DI),
+		.Cache_DI(Cache_DOUT),
 
 		.D_MEM_CSN(D_MEM_CSN),
 		.D_MEM_DOUT(D_MEM_DOUT),
+		.D_MEM_ADDR(D_MEM_ADDR),
 		.D_MEM_WEN(D_MEM_WEN),
 		.D_MEM_BE(D_MEM_BE),
 		.D_MEM_DI(D_MEM_DI),
@@ -147,18 +152,18 @@ module RISCV_TOP (
 	//Data Memory Output
 	wire [31:0] temp_ALU_Result = ALU_Result;
 
-	assign D_MEM_CSN = (~RSTn)? 1'b1 : 1'b0;
-	assign D_MEM_DOUT = RF_RD2;
-	assign D_MEM_ADDR = temp_ALU_Result[13:2]; 
-	assign D_MEM_WEN = ~MemWrite;
-	assign D_MEM_BE = BE;
+	assign Cache_CSN = ~MemRead;
+	assign Cache_DOUT = RF_RD2;
+	assign Cache_ADDR = temp_ALU_Result[13:2]; 
+	assign Cache_WEN = ~MemWrite;
+	assign Cache_BE = BE;
 
 	//Register File Output
 	assign RF_WE = RegWrite;
 	assign RF_RA1 = I_MEM_DI[19:15];
 	assign RF_RA2 = I_MEM_DI[24:20];
 	assign RF_WA1 = (RegDst) ? I_MEM_DI[11:7] : I_MEM_DI[24:20];
-	assign RF_WD = (Jump) ? PC+4 : (MemtoReg) ? D_MEM_DI : ALU_Result;
+	assign RF_WD = (Jump) ? PC+4 : (MemtoReg) ? Cache_DI : ALU_Result;
 
 
 	//Check two sequence of instructions for HALT
