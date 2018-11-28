@@ -194,7 +194,7 @@ module Control (
 			else if (currentState == 4'b0101) begin // state 5
 				// SW MEM
 				MemWrite=1;
-				MemRead=0;
+				MemRead=1;
 				BE=4'b1111; // SW
 				PCWrite=1;
 			end
