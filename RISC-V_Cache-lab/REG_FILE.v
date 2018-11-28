@@ -12,14 +12,14 @@ module REG_FILE #(
 );
 
 	//Declare the register that will store the data
-	reg [DWIDTH-1:0] RF [MDEPTH-1:0];
+	reg [DWIDTH -1:0] RF [MDEPTH-1:0];
 
 	//Define asynchronous read
 	assign RD1 = RF[RA1];
 	assign RD2 = RF[RA2];
 
 	//Define synchronous write
-	always @(negedge CLK)
+	always @(posedge CLK)
 	begin
 		if(WE && (WA != {AWIDTH{1'b0}}))
 		begin
@@ -31,6 +31,7 @@ module REG_FILE #(
 			RF[0] <= 32'b0;
 			RF[2] <= 32'hF00;
 			RF[3] <= 32'h100;
+
 			RF[1] <= 32'b0;
 			RF[4] <= 32'b0;
 			RF[5] <= 32'b0;

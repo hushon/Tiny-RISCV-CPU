@@ -68,7 +68,7 @@ module RISCV_TOP (
    		.RegDst(RegDst),       //output
    		.Jump(Jump),
 		.Branch(Branch),
-   		.MemRead(MemRead),// Always set to 1
+   		.MemRead(MemRead),
    		.MemtoReg(MemtoReg),
    		.ALUOp(ALUOp),
    		.MemWrite(MemWrite),
@@ -172,7 +172,7 @@ module RISCV_TOP (
 	assign HALT = (RF_RD1 == 32'h0000000c) && (I_MEM_DI == 32'h00008067);	
 	
 	always @(posedge CLK) begin
-		if (RSTn && NUM_INST>=8 && NUM_INST<=12) begin
+		if (RSTn && NUM_INST>=8 && NUM_INST<=7) begin
 			$display("====tik====");
 			$display("I_MEM_DI=0x%0x, NUM_INST=%d, PCWrite=%d", I_MEM_DI, NUM_INST, PCWrite);
 			$display("ALU Operand1=0x%0x, Operand2=0x%0x, ALU_Result=0x%0x", (ALUSrc1) ? PC : RF_RD1, (ALUSrc2) ? offset : RF_RD2, ALU_Result);
@@ -184,7 +184,7 @@ module RISCV_TOP (
 	end
 	
 	always @(negedge CLK) begin
-		if (RSTn && NUM_INST>=8 && NUM_INST<=12) begin
+		if (RSTn && NUM_INST>=8 && NUM_INST<=7) begin
 			$display("====tok====");
 			$display("I_MEM_DI=0x%0x, NUM_INST=%d, PCWrite=%d", I_MEM_DI, NUM_INST, PCWrite);
 			$display("ALU Operand1=0x%0x, Operand2=0x%0x, ALU_Result=0x%0x", (ALUSrc1) ? PC : RF_RD1, (ALUSrc2) ? offset : RF_RD2, ALU_Result);
