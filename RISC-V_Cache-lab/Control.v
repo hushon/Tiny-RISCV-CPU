@@ -89,15 +89,17 @@ module Control (
 				if (isLW) nextState = 4'b0011;
 				else if (isSW) nextState = 4'b0101;
 			end
-			else if (currentState == 4'b0011 && Cache_VALID) begin // state 3
-				nextState = 4'b0100;
+			else if (currentState == 4'b0011) begin // state 3
+				if (Cache_RDY) nextState = 4'b0100;
+				else nextState = 4'b0011; // stall if not ready
 			end
 			else if (currentState == 4'b0100) begin // state 4
 				nextState = 4'b0000;
 			end
-			else if (currentState == 4'b0101 && Cache_VALID) begin // state 5
+			else if (currentState == 4'b0101) begin // state 5
 				//nextState = 4'b0000;
-				nextState = 5'b10000;
+				if (Cache_RDY) nextState = 5'b10000;
+				else nextState = 4'b0101; // stall if not ready
 			end
 			else if (currentState == 4'b0110) begin // state 6
 				nextState = 4'b0111;
