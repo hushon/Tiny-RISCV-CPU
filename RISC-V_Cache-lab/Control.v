@@ -53,8 +53,8 @@ module Control (
 	/* ---------------- */
 
 	/* ---- state transition ---- */
-	reg [3:0] currentState = 4'b0000;
-	reg [3:0] nextState = 4'b0000;
+	reg [4:0] currentState = 4'b0000;
+	reg [4:0] nextState = 4'b0000;
 
 	always @(posedge CLK) begin
 		if (~RSTn) begin
@@ -96,7 +96,8 @@ module Control (
 				nextState = 4'b0000;
 			end
 			else if (currentState == 4'b0101 && Cache_VALID) begin // state 5
-				nextState = 4'b0000;
+				//nextState = 4'b0000;
+				nextState = 5'b10000;
 			end
 			else if (currentState == 4'b0110) begin // state 6
 				nextState = 4'b0111;
@@ -126,6 +127,9 @@ module Control (
 				nextState = 4'b1111;
 			end
 			else if (currentState == 4'b1111) begin // state 15
+				nextState = 4'b0000;
+			end
+			else if (currentState == 5'b10000) begin
 				nextState = 4'b0000;
 			end
 		end
@@ -199,7 +203,7 @@ module Control (
 				MemWrite=1;
 				MemRead=1;
 				BE=4'b1111; // SW
-				PCWrite=1;
+				PCWrite=0;
 			end
 			else if (currentState == 4'b0110) begin // state 6
 				// Rtype EX
@@ -280,6 +284,13 @@ module Control (
 				RegDst=1;
 				MemtoReg=0;
 				RegWrite=1;
+				PCWrite=1;
+			end
+			else if (currentState == 5'b10000) begin // state 16
+				// SW MEM (PCWrite)
+				MemWrite=0;
+				MemRead=0;
+				BE=4'b1111; // SW
 				PCWrite=1;
 			end
 		end

@@ -26,21 +26,47 @@ module Cache (
 	wire [6:0] tag;
 	wire [2:0] idx;
 	wire [1:0] g;
-	assign tag = D_MEM_ADDR[11:5];
-	assign idx = D_MEM_ADDR[4:2];
-	assign g = D_MEM_ADDR[1:0];
+	assign tag = Cache_ADDR[11:5];
+	assign idx = Cache_ADDR[4:2];
+	assign g = Cache_ADDR[1:0];
 
 	reg	[127:0]	databank[0:7];
 	reg [6:0] tagbank[0:7];
 	reg validbank[0:7];
 
-	reg timer;
+	reg [31:0] timer;
 
 	initial begin
 		timer = 0;
+		RDY = 1;
+		VALID = 0;
 		//databank = 0;
 		//tagbank = 0;
 		//validbank = 0; // THIS IS NOT CORRECT. ARRAY INITIALIZATION
+		databank[0] = 0;
+		databank[1] = 0;
+		databank[2] = 0;
+		databank[3] = 0;
+		databank[4] = 0;
+		databank[5] = 0;
+		databank[6] = 0;
+		databank[7] = 0;
+		tagbank[0] = 0;
+		tagbank[1] = 0;
+		tagbank[2] = 0;
+		tagbank[3] = 0;
+		tagbank[4] = 0;
+		tagbank[5] = 0;
+		tagbank[6] = 0;
+		tagbank[7] = 0;
+		validbank[0] = 0;
+		validbank[1] = 0;
+		validbank[2] = 0;
+		validbank[3] = 0;
+		validbank[4] = 0;
+		validbank[5] = 0;
+		validbank[6] = 0;
+		validbank[7] = 0;
 	end
 
 	// clock cycle counter
@@ -54,7 +80,7 @@ module Cache (
 	always @(*) begin // MAY HAVE TO CHANGE TO NEGEDGE
 		if (~Cache_CSN) begin
 			tag_hit = tagbank[idx]==tag;
-			valid = validbank[idx];
+			valid = validbank[idx]==1;
 			cache_hit = tag_hit && valid;
 		end
 		else begin
