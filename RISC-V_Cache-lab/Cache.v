@@ -78,14 +78,9 @@ module Cache (
 	// check cache hit
 	reg tag_hit, valid, cache_hit;
 	always @(*) begin // MAY HAVE TO CHANGE TO NEGEDGE
-		if (~Cache_CSN) begin
-			tag_hit = tagbank[idx]==tag;
-			valid = validbank[idx]==1;
-			cache_hit = tag_hit && valid;
-		end
-		else begin
-			cache_hit = 1'bx;
-		end
+		tag_hit = tagbank[idx]==tag;
+		valid = validbank[idx]==1;
+		cache_hit = tag_hit && valid;
 	end
 
 	always @(negedge CLK) begin
@@ -139,7 +134,7 @@ module Cache (
 					databank[idx][g*32 +: 32] = Cache_DI;
 					validbank[idx] = 1;
 					// WRITE TO MEMORY MEMORY[ADDR] = D_MEM_DOUT;
-					D_MEM_CSN = 0; D_MEM_WEN = 1; D_MEM_BE = 4'b1111; D_MEM_ADDR = Cache_ADDR;
+					D_MEM_CSN = 0; D_MEM_WEN = 0; D_MEM_BE = 4'b1111; D_MEM_ADDR = Cache_ADDR;
 					D_MEM_DOUT = Cache_DI;
 					RDY = 1;
 					VALID = 1;
@@ -174,6 +169,7 @@ module Cache (
 					end
 					else if (timer == 5) begin
 						databank[idx][(2'b11+1)*32-1 : 2'b11*32] = D_MEM_DI; // save 4th word to cache
+						Cache_DOUT = databank[idx][g*32 +: 32]; // output data
 						tagbank[idx] = tag; // update tag bank
 						validbank[idx] = 1; // update valid bank
 						RDY = 1;

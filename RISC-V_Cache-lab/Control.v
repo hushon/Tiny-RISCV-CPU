@@ -206,6 +206,7 @@ module Control (
 				MemRead=1;
 				BE=4'b1111; // SW
 				PCWrite=0;
+				MemtoReg=0;
 			end
 			else if (currentState == 4'b0110) begin // state 6
 				// Rtype EX

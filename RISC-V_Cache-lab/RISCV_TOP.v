@@ -118,7 +118,12 @@ module RISCV_TOP (
 	/* ---------------- */
 
 	/* --- for testbench --- */
-	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
+	//assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
+	reg [31:0] RF_WD_temp;
+	always @(*) begin
+		RF_WD_temp = RF_WD;
+	end
+	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD_temp;
 
 	initial begin
 		NUM_INST <= 0;
