@@ -3,7 +3,7 @@ module Cache (
 
 	// Cache control signals and data input/output signals
 	input wire Cache_CSN, // chip select negative
-	output reg [31:0] Cache_DOUT,
+	input wire [31:0] D_MEM_DI,
 	input wire [11:0] Cache_ADDR,
 	input wire Cache_WEN, // write enable negative
 	input wire [3:0] Cache_BE,
@@ -15,7 +15,7 @@ module Cache (
 	output reg [11:0] D_MEM_ADDR,//in word address
 	output reg D_MEM_WEN,
 	output reg [3:0] D_MEM_BE,
-	input wire [31:0] D_MEM_DI,
+	output reg [31:0] Cache_DOUT,
 	// SOME OF THEM NEEDS TO CHANGE TO OUTPUT IN ORDER TO TELL .TOP TO CONTROL MEMORY
 
 	//pipeline stall signals

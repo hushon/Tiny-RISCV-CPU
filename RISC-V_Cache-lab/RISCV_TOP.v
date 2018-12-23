@@ -31,16 +31,17 @@ module RISCV_TOP (
 
 	/* ---- instantiate modules ---- */
 	// instantiate Cache module
-	wire Cache_CSN, Cache_WEN;
-	wire [31:0] Cache_DI;
-	wire [31:0] Cache_DOUT;
+	wire Cache_CSN;
 	wire [11:0] Cache_ADDR;
+	wire Cache_WEN;
 	wire [3:0] Cache_BE;
+	wire [31:0] Cache_DOUT;
+	wire [31:0] Cache_DI;
 	wire RDY, VALID;
 	Cache D_Cache (
 		.CLK(CLK),
 		.Cache_CSN(Cache_CSN),
-		.Cache_DOUT(Cache_DI),
+		.D_MEM_DI(D_MEM_DI),
 		.Cache_ADDR(Cache_ADDR),
 		.Cache_WEN(Cache_WEN),
 		.Cache_BE(Cache_BE),
@@ -51,7 +52,7 @@ module RISCV_TOP (
 		.D_MEM_ADDR(D_MEM_ADDR),
 		.D_MEM_WEN(D_MEM_WEN),
 		.D_MEM_BE(D_MEM_BE),
-		.D_MEM_DI(D_MEM_DI),
+		.Cache_DOUT(Cache_DI),
 
 		.RDY(RDY),
 		.VALID(VALID)
@@ -118,12 +119,12 @@ module RISCV_TOP (
 	/* ---------------- */
 
 	/* --- for testbench --- */
-	//assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
-	reg [31:0] RF_WD_temp;
-	always @(*) begin
-		RF_WD_temp = RF_WD;
-	end
-	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD_temp;
+	assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD;
+	//reg [31:0] RF_WD_temp;
+	//always @(*) begin
+	//	RF_WD_temp = RF_WD;
+	///end
+	//assign OUTPUT_PORT = (Branch) ? Branch_Taken : (MemWrite)? ALU_Result : RF_WD_temp;
 
 	initial begin
 		NUM_INST <= 0;
@@ -174,29 +175,6 @@ module RISCV_TOP (
 
 
 	//Check two sequence of instructions for HALT
-	assign HALT = (RF_RD1 == 32'h0000000c) && (I_MEM_DI == 32'h00008067);	
-	
-	always @(posedge CLK) begin
-		if (RSTn && NUM_INST>=8 && NUM_INST<=7) begin
-			$display("====tik====");
-			$display("I_MEM_DI=0x%0x, NUM_INST=%d, PCWrite=%d", I_MEM_DI, NUM_INST, PCWrite);
-			$display("ALU Operand1=0x%0x, Operand2=0x%0x, ALU_Result=0x%0x", (ALUSrc1) ? PC : RF_RD1, (ALUSrc2) ? offset : RF_RD2, ALU_Result);
-			$display("RegDst=%d, RegWrite=%d", RegDst, RegWrite);
-			$display("Cache_CSN=%d, Cache_WEN=%d", Cache_CSN, Cache_WEN);
-			$display("Cache_ADDR=0x%0x, Cache_DI=0x%0x, Cache_DOUT=0x%x", Cache_ADDR, Cache_DI, Cache_DOUT);
-			$display("Cache_RDY=%d, Cache_VALID=%d", RDY, VALID);
-		end
-	end
-	
-	always @(negedge CLK) begin
-		if (RSTn && NUM_INST>=8 && NUM_INST<=7) begin
-			$display("====tok====");
-			$display("I_MEM_DI=0x%0x, NUM_INST=%d, PCWrite=%d", I_MEM_DI, NUM_INST, PCWrite);
-			$display("ALU Operand1=0x%0x, Operand2=0x%0x, ALU_Result=0x%0x", (ALUSrc1) ? PC : RF_RD1, (ALUSrc2) ? offset : RF_RD2, ALU_Result);
-			$display("RegDst=%d, RegWrite=%d", RegDst, RegWrite);
-			$display("Cache_CSN=%d, Cache_WEN=%d", Cache_CSN, Cache_WEN);
-			$display("Cache_ADDR=0x%0x, Cache_DI=0x%0x, Cache_DOUT=0x%x", Cache_ADDR, Cache_DI, Cache_DOUT);
-			$display("Cache_RDY=%d, Cache_VALID=%d", RDY, VALID);
-		end
-	end
+	assign HALT = (RF_RD1 == 32'h0000000c) && (I_MEM_DI == 32'h00008067);
+
 endmodule
