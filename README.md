@@ -1,9 +1,15 @@
 # Reduced RISC-V Implementation 
 
-Verilog implementation of CPU microarchitecture supporting a miniaturized 32-bit RISC-V ISA.
+Verilog implementation of CPU microarchitecture supporting a miniaturized 32-bit RISC-V ISA.  
+This project includes three types of microarchitectures:  
+
+- Single-cycle CPU
+- Multi-cycle CPU
+- Pipelined CPU
 
 ## Setup
 - Verilog
+- HDL simulator, or FPGA hardware
 
 ## Reduced RISC-V Instruction Set
 
