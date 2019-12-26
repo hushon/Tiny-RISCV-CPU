@@ -1,17 +1,20 @@
-# Reduced RISC-V Implementation 
+# Tiny RISC-V CPU
 
-Verilog implementation of CPU microarchitecture supporting a miniaturized 32-bit RISC-V ISA.  
-This project includes three types of microarchitectures:  
+## Introduction
+
+This repository contains RTL of a simple CPU architecture that implements our miniaturized version of the [RISC-V Instruction Set](https://riscv.org/). This project was designed and written as a result of a lab assignment during the computer architecture course at KAIST.
+
+Our implementation includes a few variants:  
 
 - Single-cycle CPU
 - Multi-cycle CPU
 - Pipelined CPU
+- Multi-cycle CPU with direct-mapped cache
 
-## Setup
-- Verilog
-- HDL simulator, or FPGA hardware
+## Diagram
+![Single Cycle CPU](./single-cycle-cpu-diagram.png)
 
-## Reduced RISC-V Instruction Set
+## Supported RISC-V Instructions
 
 | Instruction | Type | Semantics |
 |---|:---:|:---:|
